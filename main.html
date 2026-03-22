@@ -235,8 +235,8 @@
                 <div
                     style="background: white; padding: 2rem; border-radius: 15px; box-shadow: var(--shadow); margin-bottom: 2rem;">
                     <h2 style="margin-bottom: 1rem; color: var(--text-dark);">Welcome to StrandWise! 👋</h2>
-                    <p style="color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.8;">
-                        Hello, John Doe! Welcome to your personal strand recommendation dashboard. This is your space to
+                    <p style="color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.8;" id="welcomeMessage">
+                        Hello! Welcome to your personal strand recommendation dashboard. This is your space to
                         discover which academic strand aligns best with your interests, strengths, and career goals.
                     </p>
                     <p style="color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.8;">
@@ -444,20 +444,22 @@
                         <h2 style="margin-bottom: 1.5rem; color: var(--text-dark);">Your Profile</h2>
                         <div style="margin-bottom: 1.5rem;">
                             <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.3rem;">Name</p>
-                            <p style="color: var(--text-dark); font-weight: 600;">John Doe</p>
+                            <p style="color: var(--text-dark); font-weight: 600;" id="profileName">User</p>
                         </div>
                         <div style="margin-bottom: 1.5rem;">
                             <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.3rem;">Email</p>
-                            <p style="color: var(--text-dark); font-weight: 600;">john.doe@example.com</p>
+                            <p style="color: var(--text-dark); font-weight: 600;" id="profileEmail">email@example.com
+                            </p>
                         </div>
                         <div style="margin-bottom: 1.5rem;">
                             <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.3rem;">Grade Level
                             </p>
-                            <p style="color: var(--text-dark); font-weight: 600;">Grade 10</p>
+                            <p style="color: var(--text-dark); font-weight: 600;" id="profileGrade">Grade 10</p>
                         </div>
                         <div style="margin-bottom: 2rem;">
                             <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.3rem;">School</p>
-                            <p style="color: var(--text-dark); font-weight: 600;">Example High School</p>
+                            <p style="color: var(--text-dark); font-weight: 600;" id="profileSchool">Example High School
+                            </p>
                         </div>
                         <button class="btn-primary" style="width: 100%;">Edit Profile</button>
                     </div>
@@ -574,6 +576,28 @@
         </div>
     </div>
 
+    <script>
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', function () {
+            const isAuthenticated = localStorage.getItem('isAuthenticated');
+            if (!isAuthenticated) {
+                window.location.href = 'login.html';
+            } else {
+                // Load and display user data
+                const userName = localStorage.getItem('userName') || 'User';
+                const userEmail = localStorage.getItem('userEmail') || 'user@example.com';
+                const userSchool = localStorage.getItem('userSchool') || 'Example School';
+                const userGrade = localStorage.getItem('userGrade') || 'Grade 10';
+
+                // Update user avatar initials
+                const userAvatar = document.querySelector('.user-avatar');
+                if (userAvatar && userName) {
+                    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                    userAvatar.textContent = initials;
+                }
+            }
+        });
+    </script>
     <script src="main.js"></script>
 </body>
 

@@ -1,19 +1,64 @@
+// Check Authentication
+function checkAuth() {
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    if (!isAuthenticated) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
 // Navigation between pages
 function navigateToDashboard() {
+    if (!checkAuth()) {
+        return;
+    }
     document.getElementById('landingPage').classList.remove('active');
     document.getElementById('dashboardPage').classList.add('active');
     scrollToTop();
+    loadUserData();
 }
 
 function navigateToLanding() {
     document.getElementById('dashboardPage').classList.remove('active');
     document.getElementById('landingPage').classList.add('active');
+    // Clear authentication on logout
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userSchool');
+    localStorage.removeItem('userGrade');
     scrollToTop();
 }
 
 // Scroll to top
 function scrollToTop() {
     window.scrollTo(0, 0);
+}
+
+// Load User Data
+function loadUserData() {
+    const userName = localStorage.getItem('userName') || 'User';
+    const userEmail = localStorage.getItem('userEmail') || 'user@example.com';
+    const userSchool = localStorage.getItem('userSchool') || 'Example School';
+    const userGrade = localStorage.getItem('userGrade') || 'Grade 10';
+    
+    // Update welcome message
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    if (welcomeMessage) {
+        welcomeMessage.textContent = `Hello, ${userName}! Welcome to your personal strand recommendation dashboard. This is your space to discover which academic strand aligns best with your interests, strengths, and career goals.`;
+    }
+    
+    // Update profile section
+    const profileName = document.getElementById('profileName');
+    const profileEmail = document.getElementById('profileEmail');
+    const profileSchool = document.getElementById('profileSchool');
+    const profileGrade = document.getElementById('profileGrade');
+    
+    if (profileName) profileName.textContent = userName;
+    if (profileEmail) profileEmail.textContent = userEmail;
+    if (profileSchool) profileSchool.textContent = userSchool;
+    if (profileGrade) profileGrade.textContent = userGrade;
 }
 
 // Sidebar toggle
@@ -54,6 +99,11 @@ navLinks.forEach(link => {
             'help': 'Help & Support'
         };
         document.getElementById('sectionTitle').textContent = titles[sectionId] || 'StrandWise';
+
+        // Load user data when viewing profile
+        if (sectionId === 'profile') {
+            loadUserData();
+        }
 
         // Close sidebar on mobile
         if (window.innerWidth <= 768) {
