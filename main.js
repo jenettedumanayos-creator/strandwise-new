@@ -43,6 +43,19 @@ function loadUserData() {
     const userSchool = localStorage.getItem('userSchool') || 'Example School';
     const userGrade = localStorage.getItem('userGrade') || 'Grade 10';
     
+    // Get user initials
+    const initials = userName
+        .split(' ')
+        .map(name => name.charAt(0).toUpperCase())
+        .join('')
+        .substring(0, 2);
+    
+    // Update user avatar
+    const userAvatar = document.querySelector('.user-avatar');
+    if (userAvatar) {
+        userAvatar.textContent = initials;
+    }
+    
     // Update welcome message
     const welcomeMessage = document.getElementById('welcomeMessage');
     if (welcomeMessage) {

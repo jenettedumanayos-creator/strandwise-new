@@ -5,20 +5,36 @@
 }
 
 :root {
-    --primary: #6366f1;
-    --primary-light: #818cf8;
-    --primary-dark: #4f46e5;
-    --secondary: #ec4899;
-    --accent: #f59e0b;
-    --success: #10b981;
-    --bg-light: #f8fafc;
-    --bg-white: #ffffff;
-    --text-dark: #1e293b;
-    --text-light: #64748b;
-    --border-color: #e2e8f0;
-    --error: #ef4444;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    /* 🎯 Primary (Indigo - Trust & Intelligence) */
+    --primary: #5A67D8;
+    --primary-light: #7F8CF0;
+    --primary-dark: #434FC7;
+
+    /* 🌿 Secondary (Teal - Growth & Balance) */
+    --secondary: #38B2AC;
+    --secondary-light: #4FD1C5;
+    --secondary-dark: #2C9A94;
+
+    /* ✨ Accent (Yellow - Motivation & Action) */
+    --accent: #ECC94B;
+    --accent-light: #F6E05E;
+    --accent-dark: #D69E2E;
+
+    /* ✅ Status Colors (kept but adjusted to match palette) */
+    --success: #38A169;
+
+    /* 🖼️ Backgrounds */
+    --bg-light: #EDF2F7;
+    --bg-white: #FFFFFF;
+
+    /* 🔤 Text */
+    --text-dark: #2D3748;
+    --text-light: #718096;
+
+    /* 🧱 Borders & Effects */
+    --border-color: #E2E8F0;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 body {
@@ -29,6 +45,27 @@ body {
     justify-content: center;
     align-items: center;
     padding: 2rem;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.logo img {
+    height: 60px;              /* Control image size */
+    width: auto;               /* Keep aspect ratio */
+    object-fit: contain;       /* Fit properly */
+    display: block;            /* Display as block */
+    margin: 0 auto;            /* Center it */
+    max-width: 100%;           /* Responsive */
+}
+
+.logo img:hover {
+    transform: scale(1.1);
 }
 
 /* Background Decoration */
@@ -83,9 +120,24 @@ body {
 }
 
 .auth-logo {
-    font-size: 2rem;
+    font-size: 2rem;   /* ← Current size */
     font-weight: 700;
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.auth-logo img {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.auth-logo span {
+    color: white;
+    white-space: nowrap;
 }
 
 .auth-subtitle {

@@ -14,7 +14,10 @@
         <!-- Navigation Bar -->
         <nav class="navbar">
             <div class="navbar-container">
-                <div class="logo">✨ StrandWise</div>
+                <div class="logo">
+                    <img src="img/logo strandwise.png" alt="StrandWise">
+                    <span>StrandWise</span>
+                </div>
                 <ul class="nav-links">
                     <li><a href="#features">Features</a></li>
                     <li><a href="#benefits">Benefits</a></li>
@@ -147,8 +150,11 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo">✨ SW</div>
-                <button class="toggle-sidebar" onclick="toggleSidebar()">✕</button>
+                <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                <div class="sidebar-logo">
+                    <img src="img/logo strandwise.png" alt="StrandWise">
+                    <span>StrandWise</span>
+                </div>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -200,7 +206,6 @@
         <div class="main-content">
             <!-- Header -->
             <div class="content-header">
-                <button class="header-toggle" onclick="toggleSidebar()">☰</button>
                 <h1 class="header-title" id="sectionTitle">Welcome Home</h1>
                 <div class="user-menu">
                     <div class="user-avatar">JD</div>
@@ -210,34 +215,73 @@
 
             <!-- Home Section -->
             <section class="content-section active" id="home-section">
-                <div class="dashboard-grid">
-                    <div class="dashboard-card">
-                        <div class="card-icon">📝</div>
-                        <div class="card-title">Assessment Status</div>
-                        <div class="card-value">Pending</div>
+                <!-- Welcome Section with Progress -->
+                <div class="welcome-section">
+                    <div class="welcome-header">
+                        <h2>Welcome back, Student! 👋</h2>
+                        <p>Continue your journey to discover your ideal academic strand.</p>
                     </div>
-                    <div class="dashboard-card">
-                        <div class="card-icon">🎯</div>
-                        <div class="card-title">Top Match</div>
-                        <div class="card-value">-</div>
+
+                    <div class="progress-steps">
+                        <div class="progress-step completed">
+                            <div class="step-indicator">✓</div>
+                            <span class="step-label">Profile Created</span>
+                        </div>
+                        <div class="progress-step active">
+                            <div class="step-indicator">2</div>
+                            <span class="step-label">Take Assessment</span>
+                        </div>
+                        <div class="progress-step">
+                            <div class="step-indicator">3</div>
+                            <span class="step-label">Get Results</span>
+                        </div>
+                        <div class="progress-step">
+                            <div class="step-indicator">4</div>
+                            <span class="step-label">Explore Strands</span>
+                        </div>
                     </div>
-                    <div class="dashboard-card">
-                        <div class="card-icon">📊</div>
-                        <div class="card-title">Matches Found</div>
-                        <div class="card-value">0</div>
-                    </div>
-                    <div class="dashboard-card">
-                        <div class="card-icon">⭐</div>
-                        <div class="card-title">Compatibility</div>
-                        <div class="card-value">0%</div>
+
+                    <div class="overall-progress">
+                        <div class="progress-circle">
+                            <div class="progress-percentage">25%</div>
+                        </div>
+                        <div class="progress-label">Progress</div>
                     </div>
                 </div>
+
+                <!-- Dashboard Stats Cards -->
+                <div class="dashboard-card">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-item">
+                            <div class="card-icon">📝</div>
+                            <div class="card-title">Assessment Status</div>
+                            <div class="card-value">Pending</div>
+                        </div>
+                        <div class="dashboard-item">
+                            <div class="card-icon">🎯</div>
+                            <div class="card-title">Top Match</div>
+                            <div class="card-value">-</div>
+                        </div>
+                        <div class="dashboard-item">
+                            <div class="card-icon">📊</div>
+                            <div class="card-title">Matches Found</div>
+                            <div class="card-value">0</div>
+                        </div>
+                        <div class="dashboard-item">
+                            <div class="card-icon">⭐</div>
+                            <div class="card-title">Completion</div>
+                            <div class="card-value">25%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Welcome Message -->
                 <div
-                    style="background: white; padding: 2rem; border-radius: 15px; box-shadow: var(--shadow); margin-bottom: 2rem;">
+                    style="background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem;">
                     <h2 style="margin-bottom: 1rem; color: var(--text-dark);">Welcome to StrandWise! 👋</h2>
                     <p style="color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.8;" id="welcomeMessage">
-                        Hello! Welcome to your personal strand recommendation dashboard. This is your space to
-                        discover which academic strand aligns best with your interests, strengths, and career goals.
+                        Hello! Welcome to your personal strand recommendation dashboard. This is your space to discover
+                        which academic strand aligns best with your interests, strengths, and career goals.
                     </p>
                     <p style="color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.8;">
                         Start by taking our assessment to get personalized recommendations. Our intelligent system will
@@ -246,7 +290,9 @@
                     <button class="btn-primary" onclick="scrollToSection('assessment-section')">Start Your Assessment
                         →</button>
                 </div>
-                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: var(--shadow);">
+
+                <!-- Quick Tips -->
+                <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow);">
                     <h3 style="margin-bottom: 1rem; color: var(--text-dark);">Quick Tips 💡</h3>
                     <ul style="color: var(--text-light); line-height: 2;">
                         <li>✓ Take your time with the assessment - the more honest your answers, the better your results
