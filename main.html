@@ -6,6 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StrandWise - Smart Strand Recommendation System</title>
     <link rel="stylesheet" href="main.css">
+    <script>
+        // Authentication check for student access
+        document.addEventListener('DOMContentLoaded', function () {
+            const isAuthenticated = localStorage.getItem('isAuthenticated');
+            const userType = localStorage.getItem('userType');
+
+            if (!isAuthenticated) {
+                // Not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (userType === 'admin') {
+                // Admin trying to access student dashboard, redirect to admin dashboard
+                window.location.href = 'admin.html';
+                return;
+            }
+        });
+    </script>
 </head>
 
 <body>

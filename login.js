@@ -14,6 +14,27 @@ function switchForm(formType) {
     }
 }
 
+// User Type Selector
+document.addEventListener('DOMContentLoaded', function() {
+    const userTypeButtons = document.querySelectorAll('.user-type-btn');
+    const userTypeInput = document.getElementById('userTypeInput');
+    
+    userTypeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all buttons
+            userTypeButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Update hidden input value
+            userTypeInput.value = this.getAttribute('data-type');
+        });
+    });
+});
+
 // Toggle Password Visibility
 function togglePasswordVisibility(inputId) {
     const input = document.getElementById(inputId);
@@ -112,8 +133,10 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
     }
     
     if (isValid) {
+        // Get selected user type from hidden input
+        const userType = document.getElementById('userTypeInput').value;
         // Simulate login process
-        loginUser(email, password);
+        loginUser(email, password, userType);
     }
 });
 
@@ -122,7 +145,8 @@ document.getElementById('registerForm').addEventListener('submit', function (e) 
     e.preventDefault();
     
     // Clear previous errors
-    clearError('registerNameError');
+    clearError('registerFirstNameError');
+    clearError('registerLastNameError');
     clearError('registerEmailError');
     clearError('registerSchoolError');
     clearError('registerGradeError');
@@ -130,7 +154,8 @@ document.getElementById('registerForm').addEventListener('submit', function (e) 
     clearError('registerConfirmPasswordError');
     clearError('termsError');
     
-    const name = document.getElementById('registerName').value.trim();
+    const firstName = document.getElementById('registerFirstName').value.trim();
+    const lastName = document.getElementById('registerLastName').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const school = document.getElementById('registerSchool').value.trim();
     const grade = document.getElementById('registerGrade').value;
@@ -141,11 +166,19 @@ document.getElementById('registerForm').addEventListener('submit', function (e) 
     let isValid = true;
     
     // Validation
-    if (!name) {
-        showError('registerNameError', 'Full name is required');
+    if (!firstName) {
+        showError('registerFirstNameError', 'First name is required');
         isValid = false;
-    } else if (name.length < 2) {
-        showError('registerNameError', 'Name must be at least 2 characters');
+    } else if (firstName.length < 2) {
+        showError('registerFirstNameError', 'First name must be at least 2 characters');
+        isValid = false;
+    }
+
+    if (!lastName) {
+        showError('registerLastNameError', 'Last name is required');
+        isValid = false;
+    } else if (lastName.length < 2) {
+        showError('registerLastNameError', 'Last name must be at least 2 characters');
         isValid = false;
     }
     
@@ -189,13 +222,13 @@ document.getElementById('registerForm').addEventListener('submit', function (e) 
     }
     
     if (isValid) {
-        // Simulate registration process
+        const name = firstName + ' ' + lastName;
         registerUser(name, email, school, grade, password);
     }
 });
 
 // Login User Function
-function loginUser(email, password) {
+function loginUser(email, password, userType = 'student') {
     const loginBtn = document.querySelector('#loginForm .auth-btn');
     loginBtn.disabled = true;
     loginBtn.classList.add('btn-loading');
@@ -206,10 +239,15 @@ function loginUser(email, password) {
         // Store user session
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userName', email.split('@')[0]);
+        localStorage.setItem('userType', userType);
         localStorage.setItem('isAuthenticated', 'true');
         
-        // Redirect to main app
-        window.location.href = 'main.html';
+        // Redirect based on user type
+        if (userType === 'admin') {
+            window.location.href = 'admin.html';
+        } else {
+            window.location.href = 'main.html';
+        }
     }, 1500);
 }
 

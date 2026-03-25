@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - StrandWise</title>
+    <link rel="stylesheet" href="admin.css">
+    <script>
+        // Authentication check for admin access
+        document.addEventListener('DOMContentLoaded', function () {
+            const isAuthenticated = localStorage.getItem('isAuthenticated');
+            const userType = localStorage.getItem('userType');
+
+            if (!isAuthenticated) {
+                // Not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (userType !== 'admin') {
+                // Not an admin, redirect to student dashboard
+                window.location.href = 'main.html';
+                return;
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <!-- ============ ADMIN DASHBOARD ============ -->
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">
+                <img src="img/logo strandwise.png" alt="StrandWise" class="logo-img">
+                <span>StrandWise Admin</span>
+            </div>
+
+            <nav class="admin-nav">
+                <ul>
+                    <li><a href="#dashboard" class="nav-link active" data-section="dashboard">📊 Dashboard</a></li>
+                    <li><a href="#users" class="nav-link" data-section="users">👥 Users</a></li>
+                    <li><a href="#assessments" class="nav-link" data-section="assessments">📋 Assessments</a></li>
+                    <li><a href="#analytics" class="nav-link" data-section="analytics">📈 Analytics</a></li>
+                    <li><a href="#reports" class="nav-link" data-section="reports">📄 Reports</a></li>
+                    <li><a href="#settings" class="nav-link" data-section="settings">⚙️ Settings</a></li>
+                </ul>
+            </nav>
+
+            <div class="admin-footer">
+                <button class="btn-logout" onclick="logoutAdmin()">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Top Bar -->
+            <div class="admin-topbar">
+                <div class="topbar-left">
+                    <h1>Admin Dashboard</h1>
+                </div>
+                <div class="topbar-right">
+                    <div class="admin-info">
+                        <span class="admin-name">Administrator</span>
+                        <div class="admin-avatar">AD</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="admin-content">
+
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="section active">
+                    <div class="section-header">
+                        <h2>Dashboard Overview</h2>
+                        <p>System statistics and monitor key metrics</p>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-content">
+                                <h3>Total Users</h3>
+                                <p class="stat-number" id="totalUsers">0</p>
+                                <span class="stat-label">Registered users</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-content">
+                                <h3>Assessments Completed</h3>
+                                <p class="stat-number" id="completedAssessments">0</p>
+                                <span class="stat-label">This month</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-content">
+                                <h3>Average Score</h3>
+                                <p class="stat-number" id="avgScore">0%</p>
+                                <span class="stat-label">All assessments</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-content">
+                                <h3>Active Sessions</h3>
+                                <p class="stat-number" id="activeSessions">0</p>
+                                <span class="stat-label">Currently online</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h3>Strand Distribution</h3>
+                            <div class="strand-chart">
+                                <div class="strand-bar">
+                                    <div class="strand-label">Science</div>
+                                    <div class="strand-progress">
+                                        <div class="strand-fill science" style="width: 28%"></div>
+                                    </div>
+                                    <div class="strand-percent">28%</div>
+                                </div>
+                                <div class="strand-bar">
+                                    <div class="strand-label">Technology</div>
+                                    <div class="strand-progress">
+                                        <div class="strand-fill technology" style="width: 35%"></div>
+                                    </div>
+                                    <div class="strand-percent">35%</div>
+                                </div>
+                                <div class="strand-bar">
+                                    <div class="strand-label">Business</div>
+                                    <div class="strand-progress">
+                                        <div class="strand-fill business" style="width: 22%"></div>
+                                    </div>
+                                    <div class="strand-percent">22%</div>
+                                </div>
+                                <div class="strand-bar">
+                                    <div class="strand-label">Arts & Humanities</div>
+                                    <div class="strand-progress">
+                                        <div class="strand-fill arts" style="width: 15%"></div>
+                                    </div>
+                                    <div class="strand-percent">15%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <h3>User Growth (Last 7 Days)</h3>
+                            <div class="daily-chart">
+                                <div class="day-bar" style="height: 45%;" title="Mon: 15"></div>
+                                <div class="day-bar" style="height: 60%;" title="Tue: 20"></div>
+                                <div class="day-bar" style="height: 55%;" title="Wed: 18"></div>
+                                <div class="day-bar" style="height: 70%;" title="Thu: 24"></div>
+                                <div class="day-bar" style="height: 65%;" title="Fri: 22"></div>
+                                <div class="day-bar" style="height: 50%;" title="Sat: 17"></div>
+                                <div class="day-bar" style="height: 40%;" title="Sun: 13"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="activity-card">
+                        <h3>Recent Activity</h3>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <span class="activity-time">2 hours ago</span>
+                                <span class="activity-desc">New user registered</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-time">5 hours ago</span>
+                                <span class="activity-desc">Assessment submitted</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-time">1 day ago</span>
+                                <span class="activity-desc">System backup completed</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-time">2 days ago</span>
+                                <span class="activity-desc">New assessment question added</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section id="users-section" class="section">
+                    <div class="section-header">
+                        <h2>User Management</h2>
+                        <button class="btn-primary" onclick="openAddUserModal()">+ Add User</button>
+                    </div>
+
+                    <div class="search-bar">
+                        <input type="text" id="userSearch" placeholder="Search users by name or email...">
+                        <button onclick="searchUsers()">🔍 Search</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>School</th>
+                                    <th>Grade</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr>
+                                    <td>John Doe</td>
+                                    <td>john@example.com</td>
+                                    <td>Sample High School</td>
+                                    <td>Grade 11</td>
+                                    <td><span class="badge active">Active</span></td>
+                                    <td>2024-03-15</td>
+                                    <td>
+                                        <button class="btn-small btn-info" onclick="viewUserDetails(1)">View</button>
+                                        <button class="btn-small btn-danger" onclick="deleteUser(1)">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Jane Smith</td>
+                                    <td>jane@example.com</td>
+                                    <td>Central High School</td>
+                                    <td>Grade 10</td>
+                                    <td><span class="badge active">Active</span></td>
+                                    <td>2024-03-12</td>
+                                    <td>
+                                        <button class="btn-small btn-info" onclick="viewUserDetails(2)">View</button>
+                                        <button class="btn-small btn-danger" onclick="deleteUser(2)">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Assessments Section -->
+                <section id="assessments-section" class="section">
+                    <div class="section-header">
+                        <h2>Assessments Management</h2>
+                        <button class="btn-primary" onclick="openAddAssessmentModal()">+ New Assessment</button>
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="assessmentFilter">
+                            <option value="">All Assessments</option>
+                            <option value="completed">Completed</option>
+                            <option value="pending">Pending</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Question ID</th>
+                                    <th>Category</th>
+                                    <th>Question</th>
+                                    <th>Responses</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assessmentsTableBody">
+                                <tr>
+                                    <td>Q001</td>
+                                    <td>Interests</td>
+                                    <td>Which subject do you find most enjoyable?</td>
+                                    <td>342</td>
+                                    <td><span class="badge success">Active</span></td>
+                                    <td>
+                                        <button class="btn-small btn-info" onclick="editAssessment(1)">Edit</button>
+                                        <button class="btn-small btn-danger"
+                                            onclick="deleteAssessment(1)">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Q002</td>
+                                    <td>Career Goals</td>
+                                    <td>Which career path interests you the most?</td>
+                                    <td>328</td>
+                                    <td><span class="badge success">Active</span></td>
+                                    <td>
+                                        <button class="btn-small btn-info" onclick="editAssessment(2)">Edit</button>
+                                        <button class="btn-small btn-danger"
+                                            onclick="deleteAssessment(2)">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Analytics Section -->
+                <section id="analytics-section" class="section">
+                    <div class="section-header">
+                        <h2>Analytics & Insights</h2>
+                    </div>
+
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3>Completion Rate by Strand</h3>
+                            <div class="text-center">
+                                <div class="circle-stat">
+                                    <div class="circle">
+                                        <p class="percent">78%</p>
+                                    </div>
+                                    <p class="label">Overall Completion</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analytics-card">
+                            <h3>Top Performing Strands</h3>
+                            <ul class="analytics-list">
+                                <li><span>🥇 Technology</span><span class="stat">92%</span></li>
+                                <li><span>🥈 Science</span><span class="stat">87%</span></li>
+                                <li><span>🥉 Business</span><span class="stat">81%</span></li>
+                                <li><span>Arts</span><span class="stat">75%</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="analytics-card">
+                            <h3>User Assessment Frequency</h3>
+                            <ul class="analytics-list">
+                                <li><span>1st Assessment</span><span class="stat">285 users</span></li>
+                                <li><span>2nd Assessment</span><span class="stat">142 users</span></li>
+                                <li><span>3+ Assessments</span><span class="stat">73 users</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="analytics-card">
+                            <h3>Device & Browser Stats</h3>
+                            <ul class="analytics-list">
+                                <li><span>📱 Mobile</span><span class="stat">58%</span></li>
+                                <li><span>💻 Desktop</span><span class="stat">38%</span></li>
+                                <li><span>⌚ Tablet</span><span class="stat">4%</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reports Section -->
+                <section id="reports-section" class="section">
+                    <div class="section-header">
+                        <h2>Generate Reports</h2>
+                    </div>
+
+                    <div class="reports-grid">
+                        <div class="report-card">
+                            <h3>📊 User Demographics Report</h3>
+                            <p>Breakdown of users by school, grade, and location</p>
+                            <button class="btn-secondary" onclick="generateReport('demographics')">Generate
+                                Report</button>
+                        </div>
+
+                        <div class="report-card">
+                            <h3>📈 Assessment Analytics Report</h3>
+                            <p>Detailed analysis of assessment responses and trends</p>
+                            <button class="btn-secondary" onclick="generateReport('assessments')">Generate
+                                Report</button>
+                        </div>
+
+                        <div class="report-card">
+                            <h3>🎯 Strand Recommendation Report</h3>
+                            <p>Strand distribution and recommendation statistics</p>
+                            <button class="btn-secondary" onclick="generateReport('strands')">Generate Report</button>
+                        </div>
+
+                        <div class="report-card">
+                            <h3>📋 System Performance Report</h3>
+                            <p>System uptime, performance metrics, and usage stats</p>
+                            <button class="btn-secondary" onclick="generateReport('performance')">Generate
+                                Report</button>
+                        </div>
+                    </div>
+
+                    <div class="reports-history">
+                        <h3>Recent Reports</h3>
+                        <div class="history-list">
+                            <div class="history-item">
+                                <span>User Demographics Report</span>
+                                <span class="date">2024-03-24</span>
+                                <button class="btn-small" onclick="downloadReport('report-001')">Download</button>
+                            </div>
+                            <div class="history-item">
+                                <span>Assessment Analytics Report</span>
+                                <span class="date">2024-03-20</span>
+                                <button class="btn-small" onclick="downloadReport('report-002')">Download</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings-section" class="section">
+                    <div class="section-header">
+                        <h2>System Settings</h2>
+                    </div>
+
+                    <div class="settings-container">
+                        <div class="settings-group">
+                            <h3>General Settings</h3>
+                            <div class="setting-item">
+                                <label>Application Name</label>
+                                <input type="text" value="StrandWise" placeholder="Application name">
+                            </div>
+                            <div class="setting-item">
+                                <label>Max Users</label>
+                                <input type="number" value="5000" placeholder="Maximum users">
+                            </div>
+                            <div class="setting-item">
+                                <label>Assessment Timeout (minutes)</label>
+                                <input type="number" value="60" placeholder="Timeout in minutes">
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Email Settings</h3>
+                            <div class="setting-item">
+                                <label>SMTP Server</label>
+                                <input type="text" placeholder="smtp.gmail.com" value="smtp.gmail.com">
+                            </div>
+                            <div class="setting-item">
+                                <label>From Email</label>
+                                <input type="email" placeholder="noreply@strandwise.com" value="noreply@strandwise.com">
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Security Settings</h3>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" checked> Enable Two-Factor Authentication
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" checked> Require Strong Passwords
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>Password Expiry (days)</label>
+                                <input type="number" value="90" placeholder="Days">
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Backup & Maintenance</h3>
+                            <button class="btn-secondary" onclick="backupDatabase()">💾 Backup Database</button>
+                            <button class="btn-secondary" onclick="clearCache()">🗑️ Clear Cache</button>
+                            <button class="btn-danger" onclick="resetSystem()">⚠️ Reset System</button>
+                        </div>
+
+                        <button class="btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New User</h2>
+                <button class="close-btn" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label>Full Name*</label>
+                        <input type="text" required placeholder="Enter full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email*</label>
+                        <input type="email" required placeholder="Enter email">
+                    </div>
+                    <div class="form-group">
+                        <label>School*</label>
+                        <input type="text" required placeholder="Enter school name">
+                    </div>
+                    <div class="form-group">
+                        <label>Grade*</label>
+                        <select required>
+                            <option>Grade 10</option>
+                            <option>Grade 11</option>
+                            <option>Grade 12</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">Add User</button>
+                        <button type="button" class="btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

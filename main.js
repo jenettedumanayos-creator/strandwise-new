@@ -28,6 +28,12 @@ function navigateToLanding() {
     localStorage.removeItem('userName');
     localStorage.removeItem('userSchool');
     localStorage.removeItem('userGrade');
+    localStorage.removeItem('userType');
+    
+    // Redirect to login page after brief delay
+    setTimeout(() => {
+        window.location.href = 'login.html';
+    }, 500);
     scrollToTop();
 }
 

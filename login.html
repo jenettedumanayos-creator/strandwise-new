@@ -10,144 +10,155 @@
 
 <body>
     <div class="auth-container">
-        <!-- Background Decoration -->
-        <div class="bg-decoration"></div>
-
-        <div class="auth-wrapper">
-            <!-- Logo Section -->
-            <div class="auth-header">
-                <div class="auth-logo">
+        <!-- Left Panel - Branding & Image -->
+        <div class="auth-panel-left">
+            <div class="auth-branding">
+                <div class="auth-logo-large">
                     <img src="img/logo strandwise.png" alt="StrandWise">
-                    <span>StrandWise</span>
                 </div>
-                <p class="auth-subtitle">Discover Your Perfect Academic Strand</p>
+                <div class="auth-tagline">
+                    <h1>Discover Your Path</h1>
+                    <p>Find Your Perfect Academic Strand</p>
+                </div>
             </div>
+            <div class="auth-background-overlay"></div>
+        </div>
 
-            <!-- Auth Forms Container -->
-            <div class="auth-forms">
-                <!-- Login Form -->
-                <form class="auth-form active" id="loginForm">
+        <!-- Right Panel - Forms -->
+        <div class="auth-panel-right">
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm">
+                <div class="form-header">
                     <h2>Welcome Back!</h2>
-                    <p class="form-description">Sign in to your StrandWise account</p>
+                    <p class="back-to-signup">New here? <button type="button" class="toggle-form"
+                            onclick="switchForm('register')">Create Account</button></p>
+                </div>
 
-                    <div class="form-group">
-                        <label for="loginEmail">Email Address</label>
-                        <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
-                        <span class="error-message" id="loginEmailError"></span>
+                <div class="user-type-selector">
+                    <label class="selector-title">Who are you?</label>
+                    <div class="selector-buttons">
+                        <button type="button" class="user-type-btn active" data-type="student">
+                            <span class="btn-icon">👤</span>
+                            <span class="btn-label">Student</span>
+                        </button>
+                        <button type="button" class="user-type-btn" data-type="admin">
+                            <span class="btn-icon">💼</span>
+                            <span class="btn-label">Admin</span>
+                        </button>
                     </div>
+                    <input type="hidden" name="userType" value="student" id="userTypeInput">
+                </div>
 
-                    <div class="form-group">
-                        <label for="loginPassword">Password</label>
-                        <div class="password-input-wrapper">
-                            <input type="password" id="loginPassword" name="password" placeholder="Enter your password"
-                                required>
-                            <button type="button" class="toggle-password"
-                                onclick="togglePasswordVisibility('loginPassword')">👁️</button>
-                        </div>
-                        <span class="error-message" id="loginPasswordError"></span>
-                    </div>
+                <div class="form-group">
+                    <input type="email" id="loginEmail" name="email" placeholder="Email" required>
+                    <span class="error-message" id="loginEmailError"></span>
+                </div>
 
-                    <div class="remember-forgot">
-                        <label class="remember-me">
-                            <input type="checkbox"> Remember me
-                        </label>
-                        <a href="#" class="forgot-password">Forgot password?</a>
-                    </div>
-
-                    <button type="submit" class="auth-btn">Sign In</button>
-
-                    <div class="form-divider">Or</div>
-
-                    <button type="button" class="social-btn google-btn">
-                        <span>🔵</span> Continue with Google
-                    </button>
-
-                    <p class="form-footer">Don't have an account?
-                        <button type="button" class="toggle-form" onclick="switchForm('register')">Sign Up</button>
-                    </p>
-                </form>
-
-                <!-- Register Form -->
-                <form class="auth-form" id="registerForm">
-                    <h2>Get Started!</h2>
-                    <p class="form-description">Create your StrandWise account</p>
-
-                    <div class="form-group">
-                        <label for="registerName">Full Name</label>
-                        <input type="text" id="registerName" name="name" placeholder="Enter your full name" required>
-                        <span class="error-message" id="registerNameError"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="registerEmail">Email Address</label>
-                        <input type="email" id="registerEmail" name="email" placeholder="Enter your email" required>
-                        <span class="error-message" id="registerEmailError"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="registerSchool">School Name</label>
-                        <input type="text" id="registerSchool" name="school" placeholder="Enter your school name"
+                <div class="form-group">
+                    <div class="password-input-wrapper">
+                        <input type="password" id="loginPassword" name="password" placeholder="Enter your password"
                             required>
-                        <span class="error-message" id="registerSchoolError"></span>
+                        <button type="button" class="toggle-password"
+                            onclick="togglePasswordVisibility('loginPassword')">👁️</button>
                     </div>
+                    <span class="error-message" id="loginPasswordError"></span>
+                </div>
 
+                <div class="remember-forgot">
+                    <label class="remember-me">
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="auth-btn primary-btn">Sign In</button>
+
+                <div class="form-divider">Or sign in with</div>
+
+                <div class="social-buttons">
+                    <button type="button" class="social-btn google-btn">Google</button>
+                    <button type="button" class="social-btn apple-btn">Apple</button>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm">
+                <div class="form-header">
+                    <h2>Create an account</h2>
+                    <p class="back-to-login">Already have an account? <button type="button" class="toggle-form"
+                            onclick="switchForm('login')">Log in</button></p>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="registerGrade">Grade Level</label>
-                        <select id="registerGrade" name="grade" required>
-                            <option value="">Select your grade level</option>
-                            <option value="grade9">Grade 9</option>
-                            <option value="grade10">Grade 10</option>
-                            <option value="grade11">Grade 11</option>
-                            <option value="grade12">Grade 12</option>
-                        </select>
-                        <span class="error-message" id="registerGradeError"></span>
+                        <input type="text" id="registerFirstName" name="firstName" placeholder="First name" required>
+                        <span class="error-message" id="registerFirstNameError"></span>
                     </div>
-
                     <div class="form-group">
-                        <label for="registerPassword">Password</label>
-                        <div class="password-input-wrapper">
-                            <input type="password" id="registerPassword" name="password"
-                                placeholder="Create a strong password" required>
-                            <button type="button" class="toggle-password"
-                                onclick="togglePasswordVisibility('registerPassword')">👁️</button>
-                        </div>
-                        <div class="password-strength" id="passwordStrength"></div>
-                        <span class="error-message" id="registerPasswordError"></span>
+                        <input type="text" id="registerLastName" name="lastName" placeholder="Last name" required>
+                        <span class="error-message" id="registerLastNameError"></span>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="registerConfirmPassword">Confirm Password</label>
-                        <div class="password-input-wrapper">
-                            <input type="password" id="registerConfirmPassword" name="confirmPassword"
-                                placeholder="Confirm your password" required>
-                            <button type="button" class="toggle-password"
-                                onclick="togglePasswordVisibility('registerConfirmPassword')">👁️</button>
-                        </div>
-                        <span class="error-message" id="registerConfirmPasswordError"></span>
+                <div class="form-group">
+                    <input type="email" id="registerEmail" name="email" placeholder="Email" required>
+                    <span class="error-message" id="registerEmailError"></span>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" id="registerSchool" name="school" placeholder="School name" required>
+                    <span class="error-message" id="registerSchoolError"></span>
+                </div>
+
+                <div class="form-group">
+                    <select id="registerGrade" name="grade" required>
+                        <option value="">Select your grade level</option>
+                        <option value="grade9">Grade 9</option>
+                        <option value="grade10">Grade 10</option>
+                        <option value="grade11">Grade 11</option>
+                        <option value="grade12">Grade 12</option>
+                    </select>
+                    <span class="error-message" id="registerGradeError"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="password-input-wrapper">
+                        <input type="password" id="registerPassword" name="password" placeholder="Enter your password"
+                            required>
+                        <button type="button" class="toggle-password"
+                            onclick="togglePasswordVisibility('registerPassword')">👁️</button>
                     </div>
+                    <div class="password-strength" id="passwordStrength"></div>
+                    <span class="error-message" id="registerPasswordError"></span>
+                </div>
 
-                    <div class="form-group checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="termsCheckbox" required>
-                            <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy
-                                    Policy</a></span>
-                        </label>
-                        <span class="error-message" id="termsError"></span>
+                <div class="form-group">
+                    <div class="password-input-wrapper">
+                        <input type="password" id="registerConfirmPassword" name="confirmPassword"
+                            placeholder="Confirm your password" required>
+                        <button type="button" class="toggle-password"
+                            onclick="togglePasswordVisibility('registerConfirmPassword')">👁️</button>
                     </div>
+                    <span class="error-message" id="registerConfirmPasswordError"></span>
+                </div>
 
-                    <button type="submit" class="auth-btn">Create Account</button>
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="termsCheckbox" required>
+                        <span>I agree to the <a href="#">Terms & Conditions</a></span>
+                    </label>
+                    <span class="error-message" id="termsError"></span>
+                </div>
 
-                    <div class="form-divider">Or</div>
+                <button type="submit" class="auth-btn primary-btn">Create account</button>
 
-                    <button type="button" class="social-btn google-btn">
-                        <span>🔵</span> Sign up with Google
-                    </button>
+                <div class="form-divider">Or sign up with</div>
 
-                    <p class="form-footer">Already have an account?
-                        <button type="button" class="toggle-form" onclick="switchForm('login')">Sign In</button>
-                    </p>
-                </form>
-            </div>
+                <div class="social-buttons">
+                    <button type="button" class="social-btn google-btn">Google</button>
+                    <button type="button" class="social-btn apple-btn">Apple</button>
+                </div>
+            </form>
         </div>
     </div>
 
