@@ -6,25 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - StrandWise</title>
     <link rel="stylesheet" href="admin.css">
-    <script>
-        // Authentication check for admin access
-        document.addEventListener('DOMContentLoaded', function () {
-            const isAuthenticated = localStorage.getItem('isAuthenticated');
-            const userType = localStorage.getItem('userType');
-
-            if (!isAuthenticated) {
-                // Not logged in, redirect to login
-                window.location.href = 'login.html';
-                return;
-            }
-
-            if (userType !== 'admin') {
-                // Not an admin, redirect to student dashboard
-                window.location.href = 'main.html';
-                return;
-            }
-        });
-    </script>
 </head>
 
 <body>
@@ -478,33 +459,80 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Add New User</h2>
-                <button class="close-btn" onclick="closeModal('addUserModal')">&times;</button>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="addUserForm">
                     <div class="form-group">
-                        <label>Full Name*</label>
-                        <input type="text" required placeholder="Enter full name">
+                        <label>First Name*</label>
+                        <input type="text" name="first_name" required placeholder="Enter first name">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name*</label>
+                        <input type="text" name="last_name" required placeholder="Enter last name">
                     </div>
                     <div class="form-group">
                         <label>Email*</label>
-                        <input type="email" required placeholder="Enter email">
+                        <input type="email" name="email" required placeholder="Enter email">
+                    </div>
+                    <div class="form-group">
+                        <label>Password*</label>
+                        <input type="password" name="password" required placeholder="Enter password (min 8 chars)">
+                    </div>
+                    <div class="form-group">
+                        <label>Role*</label>
+                        <select name="role" required>
+                            <option value="">Select role</option>
+                            <option value="student">Student</option>
+                            <option value="admin">Admin</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>School*</label>
-                        <input type="text" required placeholder="Enter school name">
+                        <input type="text" name="school" required placeholder="Enter school name">
                     </div>
                     <div class="form-group">
                         <label>Grade*</label>
-                        <select required>
-                            <option>Grade 10</option>
-                            <option>Grade 11</option>
-                            <option>Grade 12</option>
+                        <select name="grade_level" required>
+                            <option value="">Select grade</option>
+                            <option value="Grade 10">Grade 10</option>
+                            <option value="Grade 11">Grade 11</option>
+                            <option value="Grade 12">Grade 12</option>
                         </select>
                     </div>
                     <div class="modal-actions">
                         <button type="submit" class="btn-primary">Add User</button>
-                        <button type="button" class="btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
+                        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Assessment Modal -->
+    <div id="addAssessmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Assessment</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addAssessmentForm">
+                    <div class="form-group">
+                        <label>Assessment Name*</label>
+                        <input type="text" name="name" required placeholder="Enter assessment name">
+                    </div>
+                    <div class="form-group">
+                        <label>Description*</label>
+                        <textarea name="description" required placeholder="Enter assessment description" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Questions*</label>
+                        <input type="number" name="total_questions" required placeholder="Enter total number of questions" min="1" max="100">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">Create Assessment</button>
+                        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
                     </div>
                 </form>
             </div>

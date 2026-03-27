@@ -51,10 +51,16 @@ $stmt->bind_param('i', $userId);
 $stmt->execute();
 $stmt->close();
 
-$_SESSION['user_id'] = $userId;
-$_SESSION['role'] = (string)$user['role'];
+session_regenerate_id(true);
 
-$redirect = ((string)$user['role'] === 'admin') ? 'admin.html' : 'main.html';
+$normalizedRole = strtolower((string)$user['role']);
+
+$_SESSION['user_id'] = $userId;
+$_SESSION['userId'] = $userId;
+$_SESSION['role'] = $normalizedRole;
+$_SESSION['userType'] = $normalizedRole;
+
+$redirect = ($normalizedRole === 'admin') ? 'admin.html' : 'main.html';
 
 json_response(200, [
     'success' => true,
@@ -64,7 +70,7 @@ json_response(200, [
         'first_name' => $user['first_name'],
         'last_name' => $user['last_name'],
         'email' => $user['email'],
-        'role' => $user['role'],
+        'role' => $normalizedRole,
         'school_id' => $user['school_id'],
         'redirect' => $redirect
     ]

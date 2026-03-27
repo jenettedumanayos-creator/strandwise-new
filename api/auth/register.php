@@ -91,8 +91,11 @@ try {
 
     $db->commit();
 
+    session_regenerate_id(true);
     $_SESSION['user_id'] = $userId;
-    $_SESSION['role'] = $role;
+    $_SESSION['userId'] = $userId;
+    $_SESSION['role'] = strtolower($role);
+    $_SESSION['userType'] = strtolower($role);
 
     json_response(201, [
         'success' => true,

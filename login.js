@@ -1,10 +1,31 @@
+const API_BASE = 'api';
+
+async function apiRequest(path, options = {}) {
+    const response = await fetch(`${API_BASE}${path}`, {
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+        },
+        ...options
+    });
+
+    const data = await response.json().catch(() => ({ success: false, message: 'Invalid server response' }));
+    if (!response.ok || !data.success) {
+        throw new Error(data.message || `Request failed (${response.status})`);
+    }
+    return data;
+}
+
 // Form Switching
-function switchForm(formType) {
-    event.preventDefault();
-    
+function switchForm(formType, evt) {
+    if (evt) {
+        evt.preventDefault();
+    }
+
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
-    
+
     if (formType === 'login') {
         loginForm.classList.add('active');
         registerForm.classList.remove('active');
@@ -15,7 +36,7 @@ function switchForm(formType) {
 }
 
 // User Type Selector
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const userTypeButtons = document.querySelectorAll('.user-type-btn');
     const userTypeInput = document.getElementById('userTypeInput');
     
@@ -33,7 +54,27 @@ document.addEventListener('DOMContentLoaded', function() {
             userTypeInput.value = this.getAttribute('data-type');
         });
     });
+
+    // If session already exists, redirect immediately based on role.
+    try {
+        const me = await apiRequest('/auth/me.php', { method: 'GET' });
+        const role = (me.data.role || '').toLowerCase();
+        persistSession(me.data);
+        window.location.href = role === 'admin' ? 'admin.html' : 'main.html';
+    } catch (err) {
+        // No active session, stay on login page.
+    }
 });
+
+function persistSession(user) {
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('userType', (user.role || 'student').toLowerCase());
+    localStorage.setItem('userEmail', user.email || '');
+    localStorage.setItem('userName', fullName || user.email || 'User');
+    localStorage.setItem('userSchool', user.school_name || '');
+    localStorage.setItem('userGrade', user.grade_level || '');
+}
 
 // Toggle Password Visibility
 function togglePasswordVisibility(inputId) {
@@ -222,54 +263,62 @@ document.getElementById('registerForm').addEventListener('submit', function (e) 
     }
     
     if (isValid) {
-        const name = firstName + ' ' + lastName;
-        registerUser(name, email, school, grade, password);
+        registerUser(firstName, lastName, email, school, grade, password);
     }
 });
 
 // Login User Function
-function loginUser(email, password, userType = 'student') {
+async function loginUser(email, password, userType = 'student') {
     const loginBtn = document.querySelector('#loginForm .auth-btn');
     loginBtn.disabled = true;
     loginBtn.classList.add('btn-loading');
     loginBtn.textContent = '';
-    
-    // Simulate API call
-    setTimeout(() => {
-        // Store user session
-        localStorage.setItem('userEmail', email);
-        localStorage.setItem('userName', email.split('@')[0]);
-        localStorage.setItem('userType', userType);
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        // Redirect based on user type
-        if (userType === 'admin') {
-            window.location.href = 'admin.html';
-        } else {
-            window.location.href = 'main.html';
-        }
-    }, 1500);
+
+    try {
+        const response = await apiRequest('/auth/login.php', {
+            method: 'POST',
+            body: JSON.stringify({ email, password, userType })
+        });
+
+        persistSession(response.data);
+        window.location.href = response.data.redirect || (response.data.role === 'admin' ? 'admin.html' : 'main.html');
+    } catch (err) {
+        showError('loginPasswordError', err.message || 'Login failed');
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('btn-loading');
+        loginBtn.textContent = 'Sign In';
+    }
 }
 
 // Register User Function
-function registerUser(name, email, school, grade, password) {
+async function registerUser(firstName, lastName, email, school, grade, password) {
     const registerBtn = document.querySelector('#registerForm .auth-btn');
     registerBtn.disabled = true;
     registerBtn.classList.add('btn-loading');
     registerBtn.textContent = '';
-    
-    // Simulate API call
-    setTimeout(() => {
-        // Store user session
-        localStorage.setItem('userEmail', email);
-        localStorage.setItem('userName', name);
-        localStorage.setItem('userSchool', school);
-        localStorage.setItem('userGrade', grade);
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        // Redirect to main app
+
+    try {
+        const response = await apiRequest('/auth/register.php', {
+            method: 'POST',
+            body: JSON.stringify({
+                firstName,
+                lastName,
+                email,
+                school,
+                grade,
+                password,
+                userType: 'student'
+            })
+        });
+
+        persistSession(response.data);
         window.location.href = 'main.html';
-    }, 1500);
+    } catch (err) {
+        showError('registerEmailError', err.message || 'Registration failed');
+        registerBtn.disabled = false;
+        registerBtn.classList.remove('btn-loading');
+        registerBtn.textContent = 'Create account';
+    }
 }
 
 // Real-time Password Strength Check

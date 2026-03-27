@@ -59,23 +59,26 @@ function normalize_grade(string $grade): string
 
 function require_auth(): array
 {
-    if (!isset($_SESSION['user_id'])) {
+    $sessionUserId = $_SESSION['user_id'] ?? ($_SESSION['userId'] ?? null);
+    if (!$sessionUserId) {
         json_response(401, [
             'success' => false,
             'message' => 'Unauthorized'
         ]);
     }
 
+    $sessionRole = $_SESSION['role'] ?? ($_SESSION['userType'] ?? '');
+
     return [
-        'user_id' => (int)$_SESSION['user_id'],
-        'role' => (string)($_SESSION['role'] ?? '')
+        'user_id' => (int)$sessionUserId,
+        'role' => strtolower((string)$sessionRole)
     ];
 }
 
 function require_role(string $requiredRole): array
 {
     $auth = require_auth();
-    if ($auth['role'] !== $requiredRole) {
+    if ($auth['role'] !== strtolower($requiredRole)) {
         json_response(403, [
             'success' => false,
             'message' => 'Forbidden'
