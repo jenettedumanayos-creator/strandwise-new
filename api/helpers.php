@@ -68,10 +68,14 @@ function require_auth(): array
     }
 
     $sessionRole = $_SESSION['role'] ?? ($_SESSION['userType'] ?? '');
+    $sessionAdminId = $_SESSION['admin_id'] ?? null;
+    $sessionAuthSource = $_SESSION['auth_source'] ?? 'users';
 
     return [
         'user_id' => (int)$sessionUserId,
-        'role' => strtolower((string)$sessionRole)
+        'role' => strtolower((string)$sessionRole),
+        'admin_id' => $sessionAdminId !== null ? (int)$sessionAdminId : null,
+        'auth_source' => strtolower((string)$sessionAuthSource)
     ];
 }
 

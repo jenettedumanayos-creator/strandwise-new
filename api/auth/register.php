@@ -34,7 +34,7 @@ if (strlen($password) < 8) {
     ]);
 }
 
-if (!in_array($role, ['student', 'admin', 'counselor'], true)) {
+if (!in_array($role, ['student', 'counselor'], true)) {
     $role = 'student';
 }
 
@@ -94,8 +94,11 @@ try {
     session_regenerate_id(true);
     $_SESSION['user_id'] = $userId;
     $_SESSION['userId'] = $userId;
+    $_SESSION['admin_id'] = null;
     $_SESSION['role'] = strtolower($role);
     $_SESSION['userType'] = strtolower($role);
+    $_SESSION['admin_role'] = null;
+    $_SESSION['auth_source'] = 'users';
 
     json_response(201, [
         'success' => true,

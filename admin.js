@@ -328,10 +328,11 @@ async function loadUsersTable(search = '') {
                 <td>${user.school_name || '-'}</td>
                 <td>${user.grade_level || '-'}</td>
                 <td><span class="badge ${user.status === 'active' ? 'active' : 'warning'}">${user.status}</span></td>
-                <td>-</td>
+                <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
                 <td>
-                    <button class="btn-small btn-info" onclick="viewUserDetails(${user.student_id})">View</button>
-                    <button class="btn-small btn-danger" onclick="deleteUser(${user.student_id})">Delete</button>
+                    <button class="btn-small btn-info" onclick="viewUserDetails(${user.user_id})">View</button>
+                    <button class="btn-small btn-info" onclick="editUser(${user.user_id})">Edit</button>
+                    <button class="btn-small btn-danger" onclick="deleteUser(${user.user_id})">Delete</button>
                 </td>
             </tr>
         `).join('');
@@ -348,25 +349,31 @@ function loadAssessmentsTable() {
     const tbody = document.getElementById('assessmentsTableBody');
     if (!tbody) return;
 
-    // This section remains sample data until an assessments admin endpoint is added.
-    const assessments = [
-        { id: 1, questionId: 'Q001', category: 'Interest', question: 'Which subject do you find most enjoyable?', responses: 0, status: 'Active' },
-        { id: 2, questionId: 'Q002', category: 'Career', question: 'Which career path interests you the most?', responses: 0, status: 'Active' }
-    ];
+    apiRequest('/admin/assessments.php?limit=100', { method: 'GET' })
+        .then(response => {
+            const assessments = response.data || [];
 
-    tbody.innerHTML = assessments.map(item => `
-        <tr>
-            <td>${item.questionId}</td>
-            <td>${item.category}</td>
-            <td>${item.question}</td>
-            <td>${item.responses}</td>
-            <td><span class="badge success">${item.status}</span></td>
-            <td>
-                <button class="btn-small btn-info" onclick="editAssessment(${item.id})">Edit</button>
-                <button class="btn-small btn-danger" onclick="deleteAssessment(${item.id})">Delete</button>
-            </td>
-        </tr>
-    `).join('');
+            tbody.innerHTML = assessments.map(item => `
+                <tr>
+                    <td>A-${item.assessment_id}</td>
+                    <td>${item.assessment_name}</td>
+                    <td>${item.description || '-'}</td>
+                    <td>${item.responses ?? 0}</td>
+                    <td><span class="badge success">Active</span></td>
+                    <td>
+                        <button class="btn-small btn-info" onclick="editAssessment(${item.assessment_id})">Edit</button>
+                        <button class="btn-small btn-danger" onclick="deleteAssessment(${item.assessment_id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (assessments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No assessments found.</td></tr>';
+            }
+        })
+        .catch(err => {
+            tbody.innerHTML = `<tr><td colspan="6">Failed to load assessments: ${err.message}</td></tr>`;
+        });
 }
 
 function initializeSearch() {
@@ -406,24 +413,133 @@ function filterAssessments(value) {
     });
 }
 
-function viewUserDetails(userId) {
-    alert(`Viewing details for student ${userId}`);
+async function viewUserDetails(userId) {
+    try {
+        const response = await apiRequest(`/admin/users.php?user_id=${encodeURIComponent(userId)}`, { method: 'GET' });
+        const user = response.data || {};
+
+        alert(
+            `Name: ${user.first_name || ''} ${user.last_name || ''}\n` +
+            `Email: ${user.email || '-'}\n` +
+            `Role: ${user.role || '-'}\n` +
+            `School: ${user.school_name || '-'}\n` +
+            `Grade: ${user.grade_level || '-'}\n` +
+            `Status: ${user.status || '-'}\n` +
+            `Joined: ${user.created_at ? new Date(user.created_at).toLocaleString() : '-'}`
+        );
+    } catch (err) {
+        alert(`Failed to load user details: ${err.message}`);
+    }
 }
 
-function deleteUser(userId) {
-    alert(`Delete action for student ${userId} will be wired after delete endpoint is added.`);
+async function editUser(userId) {
+    try {
+        const response = await apiRequest(`/admin/users.php?user_id=${encodeURIComponent(userId)}`, { method: 'GET' });
+        const user = response.data || {};
+
+        const firstName = prompt('First name', user.first_name || '');
+        if (firstName === null) return;
+        const lastName = prompt('Last name', user.last_name || '');
+        if (lastName === null) return;
+        const email = prompt('Email', user.email || '');
+        if (email === null) return;
+        const school = prompt('School name', user.school_name || '');
+        if (school === null) return;
+
+        let gradeLevel = user.grade_level || '';
+        if ((user.role || '').toLowerCase() === 'student') {
+            const gradeInput = prompt('Grade level (Grade 9 / Grade 10 / Grade 11 / Grade 12)', gradeLevel);
+            if (gradeInput === null) return;
+            gradeLevel = gradeInput;
+        }
+
+        const status = prompt('Status (active/inactive)', (user.status || 'active').toLowerCase());
+        if (status === null) return;
+
+        await apiRequest('/admin/users.php', {
+            method: 'PUT',
+            body: JSON.stringify({
+                user_id: userId,
+                first_name: firstName,
+                last_name: lastName,
+                email,
+                school,
+                grade_level: gradeLevel,
+                status
+            })
+        });
+
+        alert('User updated successfully.');
+        loadUsersTable(document.getElementById('userSearch')?.value || '');
+    } catch (err) {
+        alert(`Failed to update user: ${err.message}`);
+    }
+}
+
+async function deleteUser(userId) {
+    if (!confirm('Delete this user? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        await apiRequest('/admin/users.php', {
+            method: 'DELETE',
+            body: JSON.stringify({ user_id: userId })
+        });
+
+        alert('User deleted successfully.');
+        loadUsersTable(document.getElementById('userSearch')?.value || '');
+    } catch (err) {
+        alert(`Failed to delete user: ${err.message}`);
+    }
 }
 
 function viewAssessment(assessmentId) {
     alert(`Viewing assessment ${assessmentId}`);
 }
 
-function editAssessment(assessmentId) {
-    alert(`Edit assessment ${assessmentId} is not yet connected.`);
+async function editAssessment(assessmentId) {
+    try {
+        const response = await apiRequest(`/admin/assessments.php?assessment_id=${encodeURIComponent(assessmentId)}`, { method: 'GET' });
+        const assessment = response.data || {};
+
+        const name = prompt('Assessment name', assessment.assessment_name || '');
+        if (name === null) return;
+        const description = prompt('Assessment description', assessment.description || '');
+        if (description === null) return;
+
+        await apiRequest('/admin/assessments.php', {
+            method: 'PUT',
+            body: JSON.stringify({
+                assessment_id: assessmentId,
+                name,
+                description
+            })
+        });
+
+        alert('Assessment updated successfully.');
+        loadAssessmentsTable();
+    } catch (err) {
+        alert(`Failed to update assessment: ${err.message}`);
+    }
 }
 
-function deleteAssessment(assessmentId) {
-    alert(`Delete assessment ${assessmentId} is not yet connected.`);
+async function deleteAssessment(assessmentId) {
+    if (!confirm('Delete this assessment? This will also remove related assessment results.')) {
+        return;
+    }
+
+    try {
+        await apiRequest('/admin/assessments.php', {
+            method: 'DELETE',
+            body: JSON.stringify({ assessment_id: assessmentId })
+        });
+
+        alert('Assessment deleted successfully.');
+        loadAssessmentsTable();
+    } catch (err) {
+        alert(`Failed to delete assessment: ${err.message}`);
+    }
 }
 
 // ============ ANALYTICS ============

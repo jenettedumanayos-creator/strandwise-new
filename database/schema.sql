@@ -16,6 +16,7 @@ DROP TABLE IF EXISTS assessments;
 DROP TABLE IF EXISTS academic_records;
 DROP TABLE IF EXISTS students;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS strands;
 DROP TABLE IF EXISTS schools;
 
@@ -34,6 +35,25 @@ CREATE TABLE strands (
     strand_code VARCHAR(10) NOT NULL UNIQUE,
     strand_name VARCHAR(150) NOT NULL,
     description TEXT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE admins (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'admin',
+    status VARCHAR(20) NOT NULL DEFAULT 'active',
+    permissions JSON NULL,
+    last_login DATETIME NULL,
+    last_ip VARCHAR(45) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by INT NULL,
+    updated_at DATETIME NULL,
+    CONSTRAINT fk_admins_created_by FOREIGN KEY (created_by) REFERENCES admins(admin_id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE users (
@@ -199,6 +219,8 @@ CREATE TABLE school_strand_availability (
 
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_status ON users(status);
+CREATE INDEX idx_admins_role ON admins(role);
+CREATE INDEX idx_admins_status ON admins(status);
 CREATE INDEX idx_students_grade ON students(grade_level);
 CREATE INDEX idx_assessment_results_student ON assessment_results(student_id);
 CREATE INDEX idx_assessment_results_date ON assessment_results(date_taken);
@@ -216,3 +238,23 @@ ON DUPLICATE KEY UPDATE strand_name = VALUES(strand_name), description = VALUES(
 INSERT INTO assessments (assessment_name, description)
 VALUES ('Strand Interest & Aptitude Survey', 'Baseline assessment combining interest and perceived skill indicators.')
 ON DUPLICATE KEY UPDATE description = VALUES(description);
+
+INSERT INTO admins (first_name, last_name, email, password_hash, role, status, permissions, updated_at)
+VALUES (
+    'Admin',
+    'Account',
+    'admin',
+    '$2y$10$/Yznao4L48JYZBROJXY1Tui1yhFtj50VOPbVm7iPY2Ou4dpa2TjBe',
+    'admin',
+    'active',
+    JSON_OBJECT('can_retrain_ai', true, 'can_edit_strands', true, 'can_manage_users', true),
+    CURRENT_TIMESTAMP
+)
+ON DUPLICATE KEY UPDATE
+    first_name = VALUES(first_name),
+    last_name = VALUES(last_name),
+    password_hash = VALUES(password_hash),
+    role = VALUES(role),
+    status = VALUES(status),
+    permissions = VALUES(permissions),
+    updated_at = CURRENT_TIMESTAMP;
