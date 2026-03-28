@@ -1,0 +1,389 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "text": "Which subject do you find most enjoyable and easiest to understand?",
+      "options": [
+        "Mathematics and Science",
+        "Business and Economics",
+        "History, Literature, and Social Studies",
+        "Technology, Home Economics, or Livelihood subjects",
+        "I perform averagely across all subjects"
+      ]
+    },
+    {
+      "id": 2,
+      "text": "When given a difficult problem in school, how do you usually approach it?",
+      "options": [
+        "I analyze it step-by-step using logic and formulas",
+        "I think about costs, benefits, and practical outcomes",
+        "I research, read, and discuss it with others",
+        "I look for a hands-on or practical way to solve it",
+        "I try different approaches depending on the situation"
+      ]
+    },
+    {
+      "id": 3,
+      "text": "Which type of school project excites you the most?",
+      "options": [
+        "Science experiments or math competitions",
+        "Business simulations or financial planning activities",
+        "Debates, essays, or research papers on social issues",
+        "Building, cooking, designing, or technical demonstrations",
+        "Any project that doesn't require deep specialization"
+      ]
+    },
+    {
+      "id": 4,
+      "text": "How comfortable are you with numbers, equations, and data analysis?",
+      "options": [
+        "Very comfortable — I enjoy working with numbers",
+        "Comfortable when applied to business or money matters",
+        "Not my strength, but I can manage basic computations",
+        "I prefer practical calculations (measurements, budgets, etc.)",
+        "It depends on the topic"
+      ]
+    },
+    {
+      "id": 5,
+      "text": "Which of these activities would you most likely do voluntarily?",
+      "options": [
+        "Read science articles or solve math puzzles",
+        "Study market trends or watch business news",
+        "Read books, write stories, or follow current events",
+        "Learn a new skill like cooking, coding, or carpentry",
+        "Browse general topics without a specific focus"
+      ]
+    },
+    {
+      "id": 6,
+      "text": "In group work, what role do you naturally take?",
+      "options": [
+        "The researcher who gathers data and analyzes findings",
+        "The planner who manages resources and sets the budget",
+        "The communicator who presents ideas and writes reports",
+        "The executor who builds, creates, or demonstrates the output",
+        "I adapt to whatever role is needed"
+      ]
+    },
+    {
+      "id": 7,
+      "text": "Which reading material would you most likely pick up?",
+      "options": [
+        "A book about space, biology, or technology",
+        "A magazine about entrepreneurship or investing",
+        "A novel, a political commentary, or a philosophy book",
+        "A how-to guide or a technical manual",
+        "Whatever looks interesting at the moment"
+      ]
+    },
+    {
+      "id": 8,
+      "text": "How do you feel about conducting research and writing long reports?",
+      "options": [
+        "I like it when it involves scientific or technical topics",
+        "I like it when it involves business cases or economic issues",
+        "I genuinely enjoy research and writing on any topic",
+        "I prefer shorter, more practical documentation",
+        "I can do it but it's not my favorite activity"
+      ]
+    },
+    {
+      "id": 9,
+      "text": "Which best describes your performance in Science subjects?",
+      "options": [
+        "I consistently perform well and enjoy the subject",
+        "I do okay, but I'm more interested in how science applies to business",
+        "Science is not my strongest area; I prefer humanities",
+        "I prefer applied sciences like agriculture, electronics, or health",
+        "My performance is average across all science topics"
+      ]
+    },
+    {
+      "id": 10,
+      "text": "If you could attend a special seminar, which would you choose?",
+      "options": [
+        "Robotics, astronomy, or medical science",
+        "Stock market investing or business management",
+        "Creative writing, human rights, or political science",
+        "Culinary arts, automotive, or computer hardware servicing",
+        "A general life skills or career orientation seminar"
+      ]
+    },
+    {
+      "id": 11,
+      "text": "Which career path interests you the most?",
+      "options": [
+        "Doctor, engineer, scientist, or IT professional",
+        "Businessman, accountant, banker, or marketing professional",
+        "Lawyer, journalist, teacher, social worker, or politician",
+        "Chef, electrician, cosmetologist, farmer, or technician",
+        "I'm still undecided about my career"
+      ]
+    },
+    {
+      "id": 12,
+      "text": "Where do you see yourself working in the future?",
+      "options": [
+        "In a laboratory, hospital, tech company, or research institution",
+        "In a corporate office, bank, or running my own business",
+        "In a school, government office, NGO, or media organization",
+        "In a workshop, salon, kitchen, farm, or technical facility",
+        "I'm not sure yet"
+      ]
+    },
+    {
+      "id": 13,
+      "text": "How important is it for you to pursue a college degree after SHS?",
+      "options": [
+        "Very important — my dream career requires a specific college degree",
+        "Important — I plan to take a business or management course",
+        "Important — I want to take social sciences, law, or education",
+        "Not a priority — I want to work or start a business right after SHS",
+        "I'm still weighing my options"
+      ]
+    },
+    {
+      "id": 14,
+      "text": "Which of the following best describes your dream job?",
+      "options": [
+        "A job that involves discovery, innovation, and solving complex problems",
+        "A job that involves managing people, money, and business operations",
+        "A job that involves influencing, educating, or advocating for others",
+        "A job that involves creating, building, or providing a skilled service",
+        "I don't have a specific dream job yet"
+      ]
+    },
+    {
+      "id": 15,
+      "text": "If you were to start a business, what kind would it be?",
+      "options": [
+        "A tech startup, research company, or science-based enterprise",
+        "A trading business, investment firm, or management consultancy",
+        "A media outlet, school, social enterprise, or advocacy organization",
+        "A food business, repair shop, salon, or skilled services company",
+        "I haven't thought about starting a business"
+      ]
+    },
+    {
+      "id": 16,
+      "text": "How do you feel about the idea of working abroad in the future?",
+      "options": [
+        "Yes — as a professional in engineering, medicine, or technology",
+        "Yes — in international business, finance, or trade",
+        "Yes — in diplomacy, education, or humanitarian work",
+        "Yes — as a skilled worker or through an exchange program",
+        "I prefer to work locally and am still undecided"
+      ]
+    },
+    {
+      "id": 17,
+      "text": "Which of these college courses interests you the most?",
+      "options": [
+        "Engineering, Medicine, Computer Science, or Architecture",
+        "Accountancy, Business Administration, or Entrepreneurship",
+        "Political Science, Communications, Psychology, or Education",
+        "Vocational courses, Hospitality Management, or Agriculture",
+        "I haven't decided on a college course yet"
+      ]
+    },
+    {
+      "id": 18,
+      "text": "What does success look like to you after Senior High School?",
+      "options": [
+        "Getting into a top university for a science or tech program",
+        "Starting a small business or landing a job in a company",
+        "Being accepted into a course in social sciences or arts",
+        "Having a job or livelihood skill that earns me stable income",
+        "Just finishing SHS and figuring things out from there"
+      ]
+    },
+    {
+      "id": 19,
+      "text": "How soon do you want to start earning money?",
+      "options": [
+        "After college — I'm willing to study longer for a high-paying career",
+        "After college — but I may do part-time business while studying",
+        "After college — but the job's impact matters more than the pay",
+        "As soon as possible — I want to be financially independent after SHS",
+        "I haven't thought about this seriously yet"
+      ]
+    },
+    {
+      "id": 20,
+      "text": "What motivates you most about your future career?",
+      "options": [
+        "Advancing human knowledge and solving big problems",
+        "Building wealth and achieving financial freedom",
+        "Creating positive change in society and helping communities",
+        "Mastering a craft and being self-reliant through a practical skill",
+        "Having a comfortable, stable life without too much pressure"
+      ]
+    },
+    {
+      "id": 21,
+      "text": "How do you prefer to learn new things?",
+      "options": [
+        "Through experiments, data, and logical reasoning",
+        "Through case studies, simulations, and real-world business scenarios",
+        "Through reading, discussion, and exploring different perspectives",
+        "Through hands-on practice and learning by doing",
+        "Through a combination of methods depending on the topic"
+      ]
+    },
+    {
+      "id": 22,
+      "text": "Which best describes your thinking style?",
+      "options": [
+        "Analytical — I like breaking down complex ideas into logical parts",
+        "Strategic — I think about what's most practical and profitable",
+        "Critical — I question norms and enjoy deep discussions on ideas",
+        "Concrete — I prefer clear, practical tasks with visible outcomes",
+        "Flexible — I adjust my thinking depending on the situation"
+      ]
+    },
+    {
+      "id": 23,
+      "text": "How do you handle pressure and difficult challenges?",
+      "options": [
+        "I stay calm and rely on systematic problem-solving",
+        "I focus on finding the most efficient and cost-effective solution",
+        "I talk it out, seek opinions, and consider the human impact",
+        "I roll up my sleeves and take immediate, practical action",
+        "I tend to feel overwhelmed but push through eventually"
+      ]
+    },
+    {
+      "id": 24,
+      "text": "Which kind of environment do you prefer working in?",
+      "options": [
+        "Quiet, structured, and focused (like a lab or study room)",
+        "Dynamic and goal-oriented (like an office or business setting)",
+        "Collaborative and expressive (like a classroom or community space)",
+        "Active and hands-on (like a workshop, kitchen, or field)",
+        "I can adapt to most environments"
+      ]
+    },
+    {
+      "id": 25,
+      "text": "How do you usually express yourself best?",
+      "options": [
+        "Through graphs, formulas, experiments, or technical reports",
+        "Through presentations, proposals, or financial plans",
+        "Through writing, speaking, debates, or creative works",
+        "Through demonstrations, prototypes, or finished products",
+        "It depends on the situation"
+      ]
+    },
+    {
+      "id": 26,
+      "text": "When working on a long-term project, what is your biggest concern?",
+      "options": [
+        "Making sure the data and methods are accurate and valid",
+        "Making sure it's profitable and well-organized",
+        "Making sure it advocates for something meaningful",
+        "Making sure the final output is functional and well-crafted",
+        "Making sure I can finish it without too much difficulty"
+      ]
+    },
+    {
+      "id": 27,
+      "text": "How do you feel about routine and repetitive tasks?",
+      "options": [
+        "Fine, as long as the work involves precision and accuracy",
+        "Acceptable if it leads to measurable results and efficiency",
+        "I prefer variety — I enjoy exploring different ideas and issues",
+        "I prefer hands-on repetition that builds skill and mastery",
+        "I prefer a balanced mix of routine and new challenges"
+      ]
+    },
+    {
+      "id": 28,
+      "text": "Which of these words best describes your ideal self?",
+      "options": [
+        "Innovative, logical, and scientifically minded",
+        "Ambitious, organized, and business-savvy",
+        "Empathetic, articulate, and socially aware",
+        "Skilled, resourceful, and practically capable",
+        "Balanced, adaptable, and open to many possibilities"
+      ]
+    },
+    {
+      "id": 29,
+      "text": "What is your family's general expectation for you after high school?",
+      "options": [
+        "To pursue a prestigious college course like medicine or engineering",
+        "To take a business-related course or help in the family business",
+        "To pursue education, law, or public service",
+        "To learn a trade or find stable employment quickly",
+        "My family supports whatever I decide"
+      ]
+    },
+    {
+      "id": 30,
+      "text": "How would you describe your family's financial situation?",
+      "options": [
+        "Comfortable — my family can fully support a long college education",
+        "Moderate — my family can support college but I need to be practical",
+        "Moderate — my family values education and will find a way to support it",
+        "Limited — I need to be able to work or earn as soon as possible",
+        "Varies — it's uncertain and I need to keep my options open"
+      ]
+    },
+    {
+      "id": 31,
+      "text": "Does your family have an existing business or livelihood you may continue?",
+      "options": [
+        "No — my family works in professional or corporate careers",
+        "Yes — we have a business I may help manage or take over",
+        "No — my family is in government, education, or community work",
+        "Yes — we have a trade, farm, or small livelihood operation",
+        "Not applicable or I'm unsure"
+      ]
+    },
+    {
+      "id": 32,
+      "text": "How much does your family's opinion influence your strand choice?",
+      "options": [
+        "A lot — they strongly encourage a specific career path",
+        "A lot — they want me to be financially successful",
+        "Somewhat — they support me but value my own interests too",
+        "Somewhat — they want me to be independent and self-sufficient",
+        "Very little — the decision is mostly mine to make"
+      ]
+    },
+    {
+      "id": 33,
+      "text": "Are you open to taking out a student loan or applying for scholarships?",
+      "options": [
+        "Yes — I am willing to take that path for my dream career",
+        "Yes — especially if it leads to a high-earning career",
+        "Yes — if it allows me to pursue a meaningful profession",
+        "Preferably not — I'd rather take a path with lower financial risk",
+        "I haven't considered it yet"
+      ]
+    },
+    {
+      "id": 34,
+      "text": "How important is job security and a stable salary in your future career plans?",
+      "options": [
+        "Important, but I prioritize passion and long-term growth",
+        "Very important — I want a high-paying and stable career",
+        "Somewhat important — meaning and impact matter more to me",
+        "Very important — I want to earn steadily as soon as possible",
+        "I haven't thought deeply about this yet"
+      ]
+    },
+    {
+      "id": 35,
+      "text": "Which of the following best matches your family's background or community?",
+      "options": [
+        "My family highly values academic and scientific achievement",
+        "My family is involved in trade, commerce, or entrepreneurship",
+        "My family is active in education, politics, religion, or social causes",
+        "My family is involved in farming, craftsmanship, or skilled trades",
+        "My family background is mixed or doesn't strongly lean toward any of these"
+      ]
+    }
+  ]
+}
