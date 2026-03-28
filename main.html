@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StrandWise - Smart Strand Recommendation System</title>
+    <link rel="stylesheet" href="ui-dialogs.css">
     <link rel="stylesheet" href="main.css">
 </head>
 
@@ -1176,9 +1177,9 @@
             <!-- Results Section -->
             <section class="content-section" id="results-section">
                 <!-- Academic Track -->
-                <div class="track-section">
+                <div class="track-section" id="academicTrackSection">
                     <h2 class="track-title">📚 Academic Track</h2>
-                    <div class="results-container">
+                    <div class="results-container" id="academicResultsContainer">
                         <div class="result-card">
                             <h3>🔬 STEM Strand</h3>
                             <p style="color: var(--text-light); margin-bottom: 1rem;">Science, Technology, Engineering,
@@ -1226,9 +1227,9 @@
                 </div>
 
                 <!-- TVL Track -->
-                <div class="track-section">
+                <div class="track-section" id="tvlTrackSection">
                     <h2 class="track-title">🛠️ TVL (Technical-Vocational-Livelihood) Track</h2>
-                    <div class="results-container">
+                    <div class="results-container" id="tvlResultsContainer">
                         <div class="result-card">
                             <h3>🍳 Cookery Strand</h3>
                             <p style="color: var(--text-light); margin-bottom: 1rem;">Culinary Arts & Food Service</p>
@@ -1646,6 +1647,7 @@
         </div>
     </div>
 
+    <script src="ui-dialogs.js"></script>
     <script src="main.js"></script>
 </body>
 

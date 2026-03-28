@@ -3,6 +3,36 @@
 const API_BASE = 'api';
 let adminUser = null;
 
+function uiAlert(message, title = 'Notice') {
+    if (window.AppUI?.alert) {
+        return window.AppUI.alert(message, title);
+    }
+    alert(message);
+    return Promise.resolve();
+}
+
+function uiConfirm(message, title = 'Confirm', confirmText = 'OK', cancelText = 'Cancel') {
+    if (window.AppUI?.confirm) {
+        return window.AppUI.confirm(message, title, confirmText, cancelText);
+    }
+    return Promise.resolve(confirm(message));
+}
+
+function uiPrompt(label, defaultValue = '', title = 'Input Required') {
+    if (window.AppUI?.prompt) {
+        return window.AppUI.prompt(label, defaultValue, title);
+    }
+    return Promise.resolve(prompt(label, defaultValue));
+}
+
+function uiToast(message, type = 'info') {
+    if (window.AppUI?.toast) {
+        window.AppUI.toast(message, type);
+        return;
+    }
+    alert(message);
+}
+
 async function apiRequest(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
         credentials: 'include',
@@ -156,7 +186,7 @@ async function handleAddUserSubmit(event) {
 
     // Validate password minimum length
     if (payload.password.length < 8) {
-        alert('Password must be at least 8 characters');
+        await uiAlert('Password must be at least 8 characters', 'Validation');
         return;
     }
 
@@ -166,11 +196,11 @@ async function handleAddUserSubmit(event) {
             body: JSON.stringify(payload)
         });
 
-        alert('User created successfully!');
+        uiToast('User created successfully!', 'success');
         closeModal.call(form.closest('.modal').querySelector('.close-btn'));
         loadUsersTable(); // Refresh the users table
     } catch (err) {
-        alert(`Failed to create user: ${err.message}`);
+        await uiAlert(`Failed to create user: ${err.message}`, 'Request Failed');
     }
 }
 
@@ -184,17 +214,17 @@ async function handleAddAssessmentSubmit(event) {
 
     // Validate inputs
     if (payload.name.length < 3) {
-        alert('Assessment name must be at least 3 characters');
+        await uiAlert('Assessment name must be at least 3 characters', 'Validation');
         return;
     }
 
     if (payload.description.length < 10) {
-        alert('Assessment description must be at least 10 characters');
+        await uiAlert('Assessment description must be at least 10 characters', 'Validation');
         return;
     }
 
     if (payload.total_questions < 1 || payload.total_questions > 100) {
-        alert('Total questions must be between 1 and 100');
+        await uiAlert('Total questions must be between 1 and 100', 'Validation');
         return;
     }
 
@@ -204,11 +234,11 @@ async function handleAddAssessmentSubmit(event) {
             body: JSON.stringify(payload)
         });
 
-        alert('Assessment created successfully!');
+        uiToast('Assessment created successfully!', 'success');
         closeModal.call(form.closest('.modal').querySelector('.close-btn'));
         loadAssessmentsTable(); // Refresh assessments table
     } catch (err) {
-        alert(`Failed to create assessment: ${err.message}`);
+        await uiAlert(`Failed to create assessment: ${err.message}`, 'Request Failed');
     }
 }
 
@@ -219,7 +249,7 @@ async function loadDashboardData() {
         const response = await apiRequest('/admin/stats.php', { method: 'GET' });
         updateStats(response.data || {});
     } catch (err) {
-        alert(`Failed to load dashboard stats: ${err.message}`);
+        await uiAlert(`Failed to load dashboard stats: ${err.message}`, 'Request Failed');
     }
 
     renderCharts();
@@ -418,17 +448,18 @@ async function viewUserDetails(userId) {
         const response = await apiRequest(`/admin/users.php?user_id=${encodeURIComponent(userId)}`, { method: 'GET' });
         const user = response.data || {};
 
-        alert(
+        await uiAlert(
             `Name: ${user.first_name || ''} ${user.last_name || ''}\n` +
             `Email: ${user.email || '-'}\n` +
             `Role: ${user.role || '-'}\n` +
             `School: ${user.school_name || '-'}\n` +
             `Grade: ${user.grade_level || '-'}\n` +
             `Status: ${user.status || '-'}\n` +
-            `Joined: ${user.created_at ? new Date(user.created_at).toLocaleString() : '-'}`
+            `Joined: ${user.created_at ? new Date(user.created_at).toLocaleString() : '-'}`,
+            'User Details'
         );
     } catch (err) {
-        alert(`Failed to load user details: ${err.message}`);
+        await uiAlert(`Failed to load user details: ${err.message}`, 'Request Failed');
     }
 }
 
@@ -437,23 +468,23 @@ async function editUser(userId) {
         const response = await apiRequest(`/admin/users.php?user_id=${encodeURIComponent(userId)}`, { method: 'GET' });
         const user = response.data || {};
 
-        const firstName = prompt('First name', user.first_name || '');
+        const firstName = await uiPrompt('First name', user.first_name || '', 'Edit User');
         if (firstName === null) return;
-        const lastName = prompt('Last name', user.last_name || '');
+        const lastName = await uiPrompt('Last name', user.last_name || '', 'Edit User');
         if (lastName === null) return;
-        const email = prompt('Email', user.email || '');
+        const email = await uiPrompt('Email', user.email || '', 'Edit User');
         if (email === null) return;
-        const school = prompt('School name', user.school_name || '');
+        const school = await uiPrompt('School name', user.school_name || '', 'Edit User');
         if (school === null) return;
 
         let gradeLevel = user.grade_level || '';
         if ((user.role || '').toLowerCase() === 'student') {
-            const gradeInput = prompt('Grade level (Grade 9 / Grade 10 / Grade 11 / Grade 12)', gradeLevel);
+            const gradeInput = await uiPrompt('Grade level (Grade 9 / Grade 10 / Grade 11 / Grade 12)', gradeLevel, 'Edit User');
             if (gradeInput === null) return;
             gradeLevel = gradeInput;
         }
 
-        const status = prompt('Status (active/inactive)', (user.status || 'active').toLowerCase());
+        const status = await uiPrompt('Status (active/inactive)', (user.status || 'active').toLowerCase(), 'Edit User');
         if (status === null) return;
 
         await apiRequest('/admin/users.php', {
@@ -469,15 +500,15 @@ async function editUser(userId) {
             })
         });
 
-        alert('User updated successfully.');
+        uiToast('User updated successfully.', 'success');
         loadUsersTable(document.getElementById('userSearch')?.value || '');
     } catch (err) {
-        alert(`Failed to update user: ${err.message}`);
+        await uiAlert(`Failed to update user: ${err.message}`, 'Request Failed');
     }
 }
 
 async function deleteUser(userId) {
-    if (!confirm('Delete this user? This action cannot be undone.')) {
+    if (!(await uiConfirm('Delete this user? This action cannot be undone.', 'Delete User', 'Delete', 'Cancel'))) {
         return;
     }
 
@@ -487,15 +518,15 @@ async function deleteUser(userId) {
             body: JSON.stringify({ user_id: userId })
         });
 
-        alert('User deleted successfully.');
+        uiToast('User deleted successfully.', 'success');
         loadUsersTable(document.getElementById('userSearch')?.value || '');
     } catch (err) {
-        alert(`Failed to delete user: ${err.message}`);
+        await uiAlert(`Failed to delete user: ${err.message}`, 'Request Failed');
     }
 }
 
-function viewAssessment(assessmentId) {
-    alert(`Viewing assessment ${assessmentId}`);
+async function viewAssessment(assessmentId) {
+    await uiAlert(`Viewing assessment ${assessmentId}`, 'Assessment');
 }
 
 async function editAssessment(assessmentId) {
@@ -503,9 +534,9 @@ async function editAssessment(assessmentId) {
         const response = await apiRequest(`/admin/assessments.php?assessment_id=${encodeURIComponent(assessmentId)}`, { method: 'GET' });
         const assessment = response.data || {};
 
-        const name = prompt('Assessment name', assessment.assessment_name || '');
+        const name = await uiPrompt('Assessment name', assessment.assessment_name || '', 'Edit Assessment');
         if (name === null) return;
-        const description = prompt('Assessment description', assessment.description || '');
+        const description = await uiPrompt('Assessment description', assessment.description || '', 'Edit Assessment');
         if (description === null) return;
 
         await apiRequest('/admin/assessments.php', {
@@ -517,15 +548,15 @@ async function editAssessment(assessmentId) {
             })
         });
 
-        alert('Assessment updated successfully.');
+        uiToast('Assessment updated successfully.', 'success');
         loadAssessmentsTable();
     } catch (err) {
-        alert(`Failed to update assessment: ${err.message}`);
+        await uiAlert(`Failed to update assessment: ${err.message}`, 'Request Failed');
     }
 }
 
 async function deleteAssessment(assessmentId) {
-    if (!confirm('Delete this assessment? This will also remove related assessment results.')) {
+    if (!(await uiConfirm('Delete this assessment? This will also remove related assessment results.', 'Delete Assessment', 'Delete', 'Cancel'))) {
         return;
     }
 
@@ -535,10 +566,10 @@ async function deleteAssessment(assessmentId) {
             body: JSON.stringify({ assessment_id: assessmentId })
         });
 
-        alert('Assessment deleted successfully.');
+        uiToast('Assessment deleted successfully.', 'success');
         loadAssessmentsTable();
     } catch (err) {
-        alert(`Failed to delete assessment: ${err.message}`);
+        await uiAlert(`Failed to delete assessment: ${err.message}`, 'Request Failed');
     }
 }
 
@@ -566,12 +597,32 @@ function loadReportsData() {
     }
 }
 
+function buildTrainingExportUrl(format = 'csv', limit = 500) {
+    const safeFormat = format === 'json' ? 'json' : 'csv';
+    const safeLimit = Math.min(Math.max(Number(limit) || 500, 1), 5000);
+    return `${API_BASE}/admin/training_export.php?format=${encodeURIComponent(safeFormat)}&limit=${safeLimit}`;
+}
+
 function generateReport(reportName) {
-    alert(`Generating ${reportName}...`);
+    if (reportName === 'assessments' || reportName === 'strands') {
+        const url = buildTrainingExportUrl('csv', 1000);
+        window.open(url, '_blank');
+        uiToast('Training dataset CSV export started.', 'success');
+        return;
+    }
+
+    uiToast(`Generating ${reportName}...`, 'info');
 }
 
 function downloadReport(reportName) {
-    alert(`Downloading ${reportName}...`);
+    if (reportName === 'report-002') {
+        const url = buildTrainingExportUrl('csv', 1000);
+        window.open(url, '_blank');
+        uiToast('Assessment analytics training CSV downloaded.', 'success');
+        return;
+    }
+
+    uiToast(`Downloading ${reportName}...`, 'info');
 }
 
 // ============ SETTINGS ============
@@ -587,31 +638,31 @@ function initializeSettings() {
 }
 
 function saveSettings() {
-    alert('Settings saved successfully!');
+    uiToast('Settings saved successfully!', 'success');
 }
 
-function backupDatabase() {
-    if (confirm('This will create a backup of the database. Continue?')) {
-        alert('Database backup started.');
+async function backupDatabase() {
+    if (await uiConfirm('This will create a backup of the database. Continue?', 'Confirm Backup', 'Start Backup', 'Cancel')) {
+        uiToast('Database backup started.', 'info');
     }
 }
 
-function clearCache() {
-    if (confirm('This will clear all cached data. Continue?')) {
+async function clearCache() {
+    if (await uiConfirm('This will clear all cached data. Continue?', 'Clear Cache', 'Clear', 'Cancel')) {
         location.reload();
     }
 }
 
-function resetSystem() {
-    if (confirm('Are you sure you want to reset the system? This cannot be undone!')) {
-        alert('Reset flow not connected yet.');
+async function resetSystem() {
+    if (await uiConfirm('Are you sure you want to reset the system? This cannot be undone!', 'Danger', 'Reset', 'Cancel')) {
+        await uiAlert('Reset flow not connected yet.', 'Not Available');
     }
 }
 
 // ============ ADMIN LOGOUT ============
 
 async function logoutAdmin() {
-    if (!confirm('Are you sure you want to logout?')) {
+    if (!(await uiConfirm('Are you sure you want to logout?', 'Logout', 'Logout', 'Stay'))) {
         return;
     }
 

@@ -25,46 +25,51 @@ if ($roleHint === 'admin') {
     $admin = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    if ($admin && password_verify($password, (string)$admin['password_hash'])) {
-        if (($admin['status'] ?? 'active') !== 'active') {
-            json_response(403, [
-                'success' => false,
-                'message' => 'Admin account is inactive'
-            ]);
-        }
-
-        $adminId = (int)$admin['admin_id'];
-        $ipAddress = substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
-        $stmt = $db->prepare('UPDATE admins SET last_login = CURRENT_TIMESTAMP, last_ip = ?, updated_at = CURRENT_TIMESTAMP WHERE admin_id = ?');
-        $stmt->bind_param('si', $ipAddress, $adminId);
-        $stmt->execute();
-        $stmt->close();
-
-        session_regenerate_id(true);
-
-        $_SESSION['user_id'] = -$adminId;
-        $_SESSION['userId'] = -$adminId;
-        $_SESSION['admin_id'] = $adminId;
-        $_SESSION['role'] = 'admin';
-        $_SESSION['userType'] = 'admin';
-        $_SESSION['admin_role'] = strtolower((string)($admin['role'] ?? 'admin'));
-        $_SESSION['auth_source'] = 'admins';
-
-        json_response(200, [
-            'success' => true,
-            'message' => 'Login successful',
-            'data' => [
-                'user_id' => -$adminId,
-                'admin_id' => $adminId,
-                'first_name' => $admin['first_name'],
-                'last_name' => $admin['last_name'],
-                'email' => $admin['email'],
-                'role' => 'admin',
-                'admin_role' => strtolower((string)($admin['role'] ?? 'admin')),
-                'redirect' => 'admin.html'
-            ]
+    if (!$admin || !password_verify($password, (string)$admin['password_hash'])) {
+        json_response(401, [
+            'success' => false,
+            'message' => 'Invalid credentials'
         ]);
     }
+
+    if (($admin['status'] ?? 'active') !== 'active') {
+        json_response(403, [
+            'success' => false,
+            'message' => 'Admin account is inactive'
+        ]);
+    }
+
+    $adminId = (int)$admin['admin_id'];
+    $ipAddress = substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
+    $stmt = $db->prepare('UPDATE admins SET last_login = CURRENT_TIMESTAMP, last_ip = ?, updated_at = CURRENT_TIMESTAMP WHERE admin_id = ?');
+    $stmt->bind_param('si', $ipAddress, $adminId);
+    $stmt->execute();
+    $stmt->close();
+
+    session_regenerate_id(true);
+
+    $_SESSION['user_id'] = -$adminId;
+    $_SESSION['userId'] = -$adminId;
+    $_SESSION['admin_id'] = $adminId;
+    $_SESSION['role'] = 'admin';
+    $_SESSION['userType'] = 'admin';
+    $_SESSION['admin_role'] = strtolower((string)($admin['role'] ?? 'admin'));
+    $_SESSION['auth_source'] = 'admins';
+
+    json_response(200, [
+        'success' => true,
+        'message' => 'Login successful',
+        'data' => [
+            'user_id' => -$adminId,
+            'admin_id' => $adminId,
+            'first_name' => $admin['first_name'],
+            'last_name' => $admin['last_name'],
+            'email' => $admin['email'],
+            'role' => 'admin',
+            'admin_role' => strtolower((string)($admin['role'] ?? 'admin')),
+            'redirect' => 'admin.html'
+        ]
+    ]);
 }
 
 $stmt = $db->prepare('SELECT user_id, school_id, first_name, last_name, email, password_hash, role, status FROM users WHERE email = ? LIMIT 1');

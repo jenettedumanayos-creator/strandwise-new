@@ -1,5 +1,13 @@
 const API_BASE = 'api';
 
+function uiToast(message, type = 'info') {
+    if (window.AppUI?.toast) {
+        window.AppUI.toast(message, type);
+        return;
+    }
+    alert(message);
+}
+
 async function apiRequest(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
         credentials: 'include',
@@ -359,7 +367,7 @@ document.getElementById('registerEmail')?.addEventListener('blur', function () {
 document.querySelectorAll('.social-btn').forEach(btn => {
     btn.addEventListener('click', function (e) {
         e.preventDefault();
-        alert('Social login integration coming soon!');
+        uiToast('Social login integration coming soon!', 'info');
     });
 });
 

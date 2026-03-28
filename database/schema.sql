@@ -232,6 +232,7 @@ INSERT INTO strands (strand_code, strand_name, description) VALUES
 ('STEM', 'Science, Technology, Engineering and Mathematics', 'Focuses on science, technology, engineering, and mathematics disciplines.'),
 ('ABM', 'Accountancy, Business and Management', 'Prepares students for business, entrepreneurship, and finance tracks.'),
 ('HUMSS', 'Humanities and Social Sciences', 'For students interested in communication, social sciences, and public service.'),
+('TVL', 'Technical-Vocational-Livelihood', 'For hands-on learners focusing on practical skills, livelihood, and TESDA pathways.'),
 ('GAS', 'General Academic Strand', 'Flexible strand for students still exploring college options.')
 ON DUPLICATE KEY UPDATE strand_name = VALUES(strand_name), description = VALUES(description);
 

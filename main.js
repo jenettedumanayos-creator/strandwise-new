@@ -1,5 +1,22 @@
 const API_BASE = 'api';
 let currentUser = null;
+let latestResultsData = null;
+
+function uiAlert(message, title = 'Notice') {
+    if (window.AppUI?.alert) {
+        return window.AppUI.alert(message, title);
+    }
+    alert(message);
+    return Promise.resolve();
+}
+
+function uiToast(message, type = 'info') {
+    if (window.AppUI?.toast) {
+        window.AppUI.toast(message, type);
+        return;
+    }
+    alert(message);
+}
 
 async function apiRequest(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -36,6 +53,144 @@ function clearSessionStorage() {
     localStorage.removeItem('userSchool');
     localStorage.removeItem('userGrade');
     localStorage.removeItem('userType');
+}
+
+function getProgressStorageKey() {
+    const identity = currentUser?.user_id || localStorage.getItem('userEmail') || 'student';
+    return `strandwiseProgress_${identity}`;
+}
+
+function getStoredProgress() {
+    try {
+        const raw = localStorage.getItem(getProgressStorageKey());
+        if (!raw) {
+            return { explored: false };
+        }
+        const parsed = JSON.parse(raw);
+        return {
+            explored: Boolean(parsed.explored)
+        };
+    } catch (_err) {
+        return { explored: false };
+    }
+}
+
+function setStoredProgress(patch) {
+    const current = getStoredProgress();
+    const next = { ...current, ...patch };
+    localStorage.setItem(getProgressStorageKey(), JSON.stringify(next));
+    return next;
+}
+
+function updateProgressUI(state = {}) {
+    const hasResults = Boolean(state.hasResults);
+    const explored = Boolean(state.explored);
+
+    const completed = [
+        true,
+        hasResults,
+        hasResults,
+        explored
+    ];
+
+    const steps = Array.from(document.querySelectorAll('.progress-steps .progress-step'));
+    const firstIncompleteIndex = completed.findIndex(flag => !flag);
+
+    steps.forEach((step, index) => {
+        const indicator = step.querySelector('.step-indicator');
+        const isCompleted = completed[index];
+        const isActive = !isCompleted && firstIncompleteIndex === index;
+
+        step.classList.remove('completed', 'active');
+        if (isCompleted) {
+            step.classList.add('completed');
+        } else if (isActive) {
+            step.classList.add('active');
+        }
+
+        if (indicator) {
+            indicator.textContent = isCompleted ? '✓' : String(index + 1);
+        }
+    });
+
+    const completedCount = completed.filter(Boolean).length;
+    const completionPercent = Math.round((completedCount / 4) * 100);
+
+    const progressCircleValue = document.querySelector('.progress-percentage');
+    if (progressCircleValue) {
+        progressCircleValue.textContent = `${completionPercent}%`;
+    }
+
+    const completionCardValue = document.querySelector('.dashboard-grid .dashboard-item:nth-child(4) .card-value');
+    if (completionCardValue) {
+        completionCardValue.textContent = `${completionPercent}%`;
+    }
+
+    const assessmentStatusValue = document.querySelector('.dashboard-grid .dashboard-item:nth-child(1) .card-value');
+    if (assessmentStatusValue) {
+        if (hasResults) {
+            assessmentStatusValue.textContent = 'Completed ✓';
+            assessmentStatusValue.style.color = '#4caf50';
+        } else {
+            assessmentStatusValue.textContent = 'Pending';
+            assessmentStatusValue.style.color = '';
+        }
+    }
+
+    const profileStatus = document.getElementById('profileStatus');
+    const profileCompletion = document.getElementById('profileCompletion');
+    if (profileStatus) {
+        profileStatus.textContent = hasResults ? 'Completed' : 'Not Started';
+    }
+    if (profileCompletion) {
+        profileCompletion.textContent = `${completionPercent}%`;
+    }
+}
+
+function applyResultsSummaryToDashboard(results) {
+    const domainScores = results?.domain_scores || {};
+    const matchesCount = Object.keys(domainScores).length;
+
+    const matchesCardValue = document.querySelector('.dashboard-grid .dashboard-item:nth-child(3) .card-value');
+    if (matchesCardValue) {
+        matchesCardValue.textContent = String(matchesCount);
+    }
+
+    const topMatch = results?.top_recommendation?.strand || '-';
+
+    const topMatchCardValue = document.querySelector('.dashboard-grid .dashboard-item:nth-child(2) .card-value');
+    if (topMatchCardValue) {
+        topMatchCardValue.textContent = topMatch;
+    }
+
+    const profileTopMatch = document.getElementById('profileTopMatch');
+    const profileScore = document.getElementById('profileScore');
+    if (profileTopMatch) {
+        profileTopMatch.textContent = topMatch;
+    }
+    if (profileScore) {
+        profileScore.textContent = results?.top_recommendation?.confidence || '-';
+    }
+}
+
+async function syncProgressFromServer() {
+    try {
+        const response = await apiRequest('/student/get_results.php', { method: 'GET' });
+        const results = response.data || {};
+        const hasResults = Boolean(results.domain_scores && Object.keys(results.domain_scores).length > 0);
+        const stored = getStoredProgress();
+
+        latestResultsData = hasResults ? results : null;
+
+        if (hasResults) {
+            applyResultsSummaryToDashboard(results);
+        }
+
+        updateProgressUI({ hasResults, explored: stored.explored });
+    } catch (_err) {
+        const stored = getStoredProgress();
+        updateProgressUI({ hasResults: false, explored: stored.explored });
+    }
 }
 
 async function checkAuth() {
@@ -79,6 +234,7 @@ async function navigateToDashboard() {
 
     scrollToTop();
     loadUserData();
+    await syncProgressFromServer();
 }
 
 async function navigateToLanding() {
@@ -174,6 +330,12 @@ navLinks.forEach(link => {
             loadUserData();
         }
 
+        if (sectionId === 'explore') {
+            setStoredProgress({ explored: true });
+            const hasResults = Boolean(latestResultsData?.domain_scores && Object.keys(latestResultsData.domain_scores).length > 0);
+            updateProgressUI({ hasResults, explored: true });
+        }
+
         if (window.innerWidth <= 768) {
             const sidebar = document.getElementById('sidebar');
             if (sidebar) {
@@ -184,10 +346,10 @@ navLinks.forEach(link => {
 });
 
 function mapQuestionToCategory(questionNumber) {
-    if (questionNumber <= 10) return 'Interest';
-    if (questionNumber <= 20) return 'Career';
-    if (questionNumber <= 30) return 'Skill';
-    return 'Financial';
+    if (questionNumber <= 10) return 'Part I: Academic Interests & Strengths';
+    if (questionNumber <= 20) return 'Part II: Career Goals & Future Plans';
+    if (questionNumber <= 28) return 'Part III: Personality & Work Style';
+    return 'Part IV: Family Background & Finances';
 }
 
 function mapOptionToDomain(optionIndex) {
@@ -260,8 +422,40 @@ async function fetchAndDisplayResults() {
             return;
         }
 
+        latestResultsData = results;
+
         // Build strand info mapping
         const strandInfo = {
+            'STEM': {
+                icon: '🔬',
+                title: 'STEM',
+                desc: 'Biology, Chemistry, Physics & Research',
+                career: 'Excellent for careers in medicine, research, and scientific fields.'
+            },
+            'ABM': {
+                icon: '🏢',
+                title: 'ABM',
+                desc: 'Business, Economics, & Management',
+                career: 'Suitable for business leaders, entrepreneurs, and managers.'
+            },
+            'HUMSS': {
+                icon: '🎨',
+                title: 'HUMSS',
+                desc: 'Humanities, Social Sciences, & Languages',
+                career: 'Perfect for writers, educators, and social advocates.'
+            },
+            'TVL': {
+                icon: '🛠️',
+                title: 'TVL',
+                desc: 'Technical & Practical Skills',
+                career: 'Ideal for technicians, trades professionals, and applied specialists.'
+            },
+            'GAS': {
+                icon: '📚',
+                title: 'GAS',
+                desc: 'Broad Foundation Knowledge',
+                career: 'Provides well-rounded background for diverse paths.'
+            },
             'Math': {
                 icon: '🔬',
                 title: 'Science Strand',
@@ -294,15 +488,19 @@ async function fetchAndDisplayResults() {
             }
         };
 
-        // Find the results container
-        const resultsContainer = document.querySelector('#results-section .results-container');
-        if (!resultsContainer) {
+        // Find dynamic results containers
+        const academicResultsContainer = document.getElementById('academicResultsContainer')
+            || document.querySelector('#results-section .track-section .results-container');
+        const tvlResultsContainer = document.getElementById('tvlResultsContainer');
+        const tvlTrackSection = document.getElementById('tvlTrackSection');
+
+        if (!academicResultsContainer) {
             console.warn('Results container not found');
             return;
         }
 
         // Clear existing cards
-        resultsContainer.innerHTML = '';
+        academicResultsContainer.innerHTML = '';
 
         // Sort domains by score (highest first)
         const sortedDomains = Object.entries(results.domain_scores)
@@ -310,6 +508,7 @@ async function fetchAndDisplayResults() {
 
         // Calculate max score for percentage
         const maxScore = Math.max(...Object.values(results.domain_scores), 1);
+        const maxWeightedScore = Number(results.max_weighted_score || 54);
 
         // Create result cards for each domain
         sortedDomains.forEach(([domain, score]) => {
@@ -320,7 +519,7 @@ async function fetchAndDisplayResults() {
                 career: 'Explore this strand for more information.'
             };
 
-            const percentage = Math.round((score / (20 * 1)) * 100);
+            const percentage = Math.round((score / Math.max(maxWeightedScore, maxScore)) * 100);
             const html = `
                 <div class="result-card">
                     <h3>${info.icon} ${info.title}</h3>
@@ -332,33 +531,75 @@ async function fetchAndDisplayResults() {
                     <p style="color: var(--text-light); font-size: 0.95rem;">${info.career}</p>
                 </div>
             `;
-            resultsContainer.insertAdjacentHTML('beforeend', html);
+            academicResultsContainer.insertAdjacentHTML('beforeend', html);
         });
 
-        // Update dashboard stats
-        if (results.top_recommendation) {
-            const topMatchCard = document.querySelector('.dashboard-grid .dashboard-item:nth-child(2)');
-            if (topMatchCard) {
-                const valueElement = topMatchCard.querySelector('.card-value');
-                if (valueElement) {
-                    valueElement.textContent = results.top_recommendation.strand;
+        // Render TVL sub-track scores from real backend explanation payload.
+        const tvlSubtracks = results.tvl_subtracks || {};
+        if (tvlTrackSection && tvlResultsContainer) {
+            const entries = [
+                {
+                    key: 'ICT',
+                    icon: '💻',
+                    title: 'ICT Strand',
+                    desc: 'Information & Communications Technology',
+                    career: 'Excellent for IT professionals, software developers, and tech support specialists.'
+                },
+                {
+                    key: 'Cookery',
+                    icon: '🍳',
+                    title: 'Cookery Strand',
+                    desc: 'Culinary Arts & Food Service',
+                    career: 'Perfect for aspiring chefs, food entrepreneurs, and hospitality professionals.'
+                },
+                {
+                    key: 'Industrial',
+                    icon: '🧰',
+                    title: 'Industrial Arts Strand',
+                    desc: 'Electronics, automotive, and skilled trades',
+                    career: 'Great for technicians, electricians, mechanics, and applied craft careers.'
                 }
+            ];
+
+            const available = entries
+                .map(meta => ({ meta, data: tvlSubtracks[meta.key] }))
+                .filter(item => item.data && Number(item.data.percent) > 0);
+
+            if (available.length > 0) {
+                tvlTrackSection.style.display = '';
+                tvlResultsContainer.innerHTML = '';
+
+                available.forEach(item => {
+                    const pct = Math.round(Number(item.data.percent) || 0);
+                    const card = `
+                        <div class="result-card">
+                            <h3>${item.meta.icon} ${item.meta.title}</h3>
+                            <p style="color: var(--text-light); margin-bottom: 1rem;">${item.meta.desc}</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${pct}%;"></div>
+                            </div>
+                            <p style="font-size: 0.9rem; color: var(--text-light); margin: 1rem 0;">${pct}% TVL Sub-track Match</p>
+                            <p style="color: var(--text-light); font-size: 0.95rem;">${item.meta.career}</p>
+                        </div>
+                    `;
+                    tvlResultsContainer.insertAdjacentHTML('beforeend', card);
+                });
+            } else {
+                tvlTrackSection.style.display = 'none';
             }
         }
 
-        // Mark assessment as completed
-        const statusCard = document.querySelector('.dashboard-grid .dashboard-item:nth-child(1)');
-        if (statusCard) {
-            const valueElement = statusCard.querySelector('.card-value');
-            if (valueElement) {
-                valueElement.textContent = 'Completed ✓';
-                valueElement.style.color = '#4caf50';
-            }
+        if (Array.isArray(results.decision_path) && results.decision_path.length > 0) {
+            console.log('Tie decision path:', results.decision_path.join(' | '));
         }
+
+        applyResultsSummaryToDashboard(results);
+        const stored = getStoredProgress();
+        updateProgressUI({ hasResults: true, explored: stored.explored });
     } catch (err) {
         console.error('Failed to fetch results:', err);
         console.error('Error details:', err.message);
-        alert(`Failed to load your results: ${err.message}`);
+        await uiAlert(`Failed to load your results: ${err.message}`, 'Request Failed');
     }
 }
 
@@ -370,7 +611,7 @@ async function submitAssessment() {
     const payload = collectAssessmentPayload();
 
     if (payload.error) {
-        alert(payload.error);
+        await uiAlert(payload.error, 'Incomplete Assessment');
         return;
     }
 
@@ -381,7 +622,7 @@ async function submitAssessment() {
             body: JSON.stringify(payload)
         });
 
-        alert('Assessment submitted successfully! Fetching your personalized recommendations...');
+        uiToast('Assessment submitted successfully! Fetching your personalized recommendations...', 'success');
         
         // Fetch and display results
         await fetchAndDisplayResults();
@@ -395,7 +636,7 @@ async function submitAssessment() {
             window.location.href = 'login.html';
             return;
         }
-        alert(`Failed to submit assessment: ${err.message}`);
+        await uiAlert(`Failed to submit assessment: ${err.message}`, 'Submit Failed');
     }
 }
 
