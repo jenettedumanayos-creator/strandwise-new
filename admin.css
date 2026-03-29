@@ -380,10 +380,26 @@ body {
     margin-bottom: 0.75rem;
 }
 
+.ai-progress-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.ai-progress-actions .btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 .ai-progress-phase {
     color: var(--text-light);
     font-size: 0.95rem;
     margin-bottom: 0.85rem;
+}
+
+.ai-progress-run-status {
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
 }
 
 .ai-progress-track {
@@ -480,6 +496,71 @@ body {
 
 .ai-milestone-item.done .ai-milestone-status {
     color: var(--success-color);
+}
+
+.ai-run-history {
+    margin-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+}
+
+.ai-run-history h4 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+.ai-run-history-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.ai-run-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.6rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+}
+
+.ai-run-item .meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-run-item .title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.ai-run-item .sub {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.ai-run-item .status {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #2563eb;
+    text-transform: uppercase;
+}
+
+.ai-run-item.completed .status {
+    color: #16a34a;
+}
+
+.ai-run-item.failed .status {
+    color: #dc2626;
+}
+
+.ai-run-item.empty {
+    justify-content: center;
+    color: var(--text-light);
+    font-style: italic;
 }
 
 .activity-card h3 {

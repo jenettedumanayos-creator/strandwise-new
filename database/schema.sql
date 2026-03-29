@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS school_strand_availability;
 DROP TABLE IF EXISTS student_external_factors;
 DROP TABLE IF EXISTS interview_feedback;
 DROP TABLE IF EXISTS recommendations;
+DROP TABLE IF EXISTS ai_training_runs;
 DROP TABLE IF EXISTS ai_models;
 DROP TABLE IF EXISTS survey_responses;
 DROP TABLE IF EXISTS survey_questions;
@@ -151,6 +152,28 @@ CREATE TABLE ai_models (
     algorithm_type VARCHAR(100) NOT NULL,
     training_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     accuracy_score DECIMAL(5,2) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE ai_training_runs (
+    run_id INT AUTO_INCREMENT PRIMARY KEY,
+    model_id INT NULL,
+    triggered_by_admin_id INT NULL,
+    status VARCHAR(20) NOT NULL,
+    message VARCHAR(255) NULL,
+    samples_used INT NOT NULL DEFAULT 0,
+    class_coverage INT NOT NULL DEFAULT 0,
+    weighted_rows_used INT NOT NULL DEFAULT 0,
+    accuracy_score DECIMAL(5,2) NULL,
+    started_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    finished_at DATETIME NULL,
+    CONSTRAINT fk_training_runs_model FOREIGN KEY (model_id) REFERENCES ai_models(model_id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    CONSTRAINT fk_training_runs_admin FOREIGN KEY (triggered_by_admin_id) REFERENCES admins(admin_id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    INDEX idx_training_runs_status (status),
+    INDEX idx_training_runs_started (started_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE recommendations (

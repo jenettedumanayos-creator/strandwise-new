@@ -2,6 +2,8 @@
 
 const API_BASE = 'api';
 let adminUser = null;
+let aiProgressIntervalId = null;
+let aiTrainingBusy = false;
 
 function uiAlert(message, title = 'Notice') {
     if (window.AppUI?.alert) {
@@ -246,8 +248,81 @@ async function loadDashboardData() {
     }
 
     loadModelProgress();
+    startAiProgressAutoRefresh();
     renderCharts();
     loadActivityFeed();
+}
+
+function startAiProgressAutoRefresh() {
+    if (aiProgressIntervalId) {
+        clearInterval(aiProgressIntervalId);
+    }
+
+    aiProgressIntervalId = window.setInterval(() => {
+        const dashboardSection = document.getElementById('dashboard-section');
+        if (!dashboardSection || !dashboardSection.classList.contains('active')) {
+            return;
+        }
+        loadModelProgress();
+    }, 15000);
+}
+
+function stopAiProgressAutoRefresh() {
+    if (aiProgressIntervalId) {
+        clearInterval(aiProgressIntervalId);
+        aiProgressIntervalId = null;
+    }
+}
+
+function formatDateTime(input) {
+    if (!input) return '-';
+    const d = new Date(input.replace(' ', 'T'));
+    if (Number.isNaN(d.getTime())) return input;
+    return d.toLocaleString();
+}
+
+async function startModelTraining() {
+    if (aiTrainingBusy) {
+        return;
+    }
+
+    const proceed = await uiConfirm(
+        'Start AI model training now? This uses current labeled recommendations and weighted rows.',
+        'Train Model',
+        'Start Training',
+        'Cancel'
+    );
+
+    if (!proceed) {
+        return;
+    }
+
+    const trainBtn = document.getElementById('aiTrainBtn');
+    aiTrainingBusy = true;
+    if (trainBtn) {
+        trainBtn.disabled = true;
+        trainBtn.textContent = 'Training...';
+    }
+
+    try {
+        const response = await apiRequest('/admin/train_model.php', {
+            method: 'POST',
+            body: JSON.stringify({ trigger: 'manual_dashboard' })
+        });
+
+        const accuracy = response.data?.accuracy_score;
+        const suffix = accuracy !== undefined && accuracy !== null ? ` Accuracy: ${accuracy}%.` : '';
+        uiToast(`Training finished successfully.${suffix}`, 'success');
+    } catch (err) {
+        await uiAlert(`Training failed: ${err.message}`, 'Training Failed');
+    } finally {
+        aiTrainingBusy = false;
+        if (trainBtn) {
+            trainBtn.disabled = false;
+            trainBtn.textContent = 'Start Training';
+        }
+        loadModelProgress();
+    }
 }
 
 async function loadModelProgress() {
@@ -261,6 +336,8 @@ async function loadModelProgress() {
         const classCoverage = Number(data.class_coverage || 0);
         const weightedRows = Number(data.weighted_result_rows || 0);
         const latestAccuracy = data.latest_model?.accuracy_score;
+        const latestRun = data.latest_run || null;
+        const runHistory = Array.isArray(data.run_history) ? data.run_history : [];
         const milestones = Array.isArray(data.milestones) ? data.milestones : [];
 
         const progressFill = document.getElementById('aiProgressFill');
@@ -270,7 +347,9 @@ async function loadModelProgress() {
         const classEl = document.getElementById('aiClassCoverage');
         const rowsEl = document.getElementById('aiWeightedRows');
         const accuracyEl = document.getElementById('aiLatestAccuracy');
+        const runStatusEl = document.getElementById('aiRunStatus');
         const milestonesEl = document.getElementById('aiMilestones');
+        const historyEl = document.getElementById('aiRunHistoryList');
 
         if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
         if (progressPercent) progressPercent.textContent = `${Math.round(percent)}%`;
@@ -279,6 +358,16 @@ async function loadModelProgress() {
         if (classEl) classEl.textContent = `${classCoverage}/5`;
         if (rowsEl) rowsEl.textContent = String(weightedRows);
         if (accuracyEl) accuracyEl.textContent = latestAccuracy === null || latestAccuracy === undefined ? 'Pending' : `${latestAccuracy}%`;
+        if (runStatusEl) {
+            if (!latestRun) {
+                runStatusEl.textContent = 'Last run: none yet';
+            } else {
+                const accText = latestRun.accuracy_score === null || latestRun.accuracy_score === undefined
+                    ? 'n/a'
+                    : `${latestRun.accuracy_score}%`;
+                runStatusEl.textContent = `Last run: ${latestRun.status} at ${formatDateTime(latestRun.finished_at || latestRun.started_at)} (accuracy: ${accText})`;
+            }
+        }
 
         if (milestonesEl) {
             milestonesEl.innerHTML = milestones.map(item => {
@@ -294,10 +383,40 @@ async function loadModelProgress() {
                 `;
             }).join('');
         }
+
+        if (historyEl) {
+            if (runHistory.length === 0) {
+                historyEl.innerHTML = '<div class="ai-run-item empty">No training runs yet.</div>';
+            } else {
+                historyEl.innerHTML = runHistory.map(run => {
+                    const status = String(run.status || 'unknown').toLowerCase();
+                    const accText = run.accuracy_score === null || run.accuracy_score === undefined
+                        ? 'n/a'
+                        : `${run.accuracy_score}%`;
+                    return `
+                        <div class="ai-run-item ${status}">
+                            <div class="meta">
+                                <span class="title">Run #${run.run_id} | ${formatDateTime(run.started_at)}</span>
+                                <span class="sub">samples=${run.samples_used}, classes=${run.class_coverage}/5, rows=${run.weighted_rows_used}, accuracy=${accText}</span>
+                            </div>
+                            <span class="status">${status}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
     } catch (err) {
+        const runStatusEl = document.getElementById('aiRunStatus');
         const milestonesEl = document.getElementById('aiMilestones');
+        const historyEl = document.getElementById('aiRunHistoryList');
+        if (runStatusEl) {
+            runStatusEl.textContent = 'Last run: unavailable';
+        }
         if (milestonesEl) {
             milestonesEl.innerHTML = `<div class="ai-milestone-item"><div class="meta"><span class="title">Failed to load AI progress</span><span class="sub">${err.message}</span></div><span class="ai-milestone-status">Error</span></div>`;
+        }
+        if (historyEl) {
+            historyEl.innerHTML = `<div class="ai-run-item failed"><div class="meta"><span class="title">Unable to load training history</span><span class="sub">${err.message}</span></div><span class="status">error</span></div>`;
         }
     }
 }
@@ -745,11 +864,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     if (sectionId === 'dashboard-section') {
                         loadDashboardData();
+                        startAiProgressAutoRefresh();
                     } else if (sectionId === 'analytics-section') {
+                        stopAiProgressAutoRefresh();
                         loadAnalyticsData();
                     } else if (sectionId === 'reports-section') {
+                        stopAiProgressAutoRefresh();
                         loadReportsData();
                     } else if (sectionId === 'settings-section') {
+                        stopAiProgressAutoRefresh();
                         initializeSettings();
                     }
                 }

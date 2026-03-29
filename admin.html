@@ -167,9 +167,13 @@
                     <div class="activity-card ai-progress-card">
                         <div class="ai-progress-header">
                             <h3>AI Training Progress</h3>
-                            <button class="btn-small btn-info" onclick="loadModelProgress()">Refresh</button>
+                            <div class="ai-progress-actions">
+                                <button class="btn-small btn-primary" id="aiTrainBtn" onclick="startModelTraining()">Start Training</button>
+                                <button class="btn-small btn-info" onclick="loadModelProgress()">Refresh</button>
+                            </div>
                         </div>
                         <p class="ai-progress-phase" id="aiCurrentPhase">Phase: Data Preparation</p>
+                        <p class="ai-progress-run-status" id="aiRunStatus">Last run: none yet</p>
                         <div class="ai-progress-track">
                             <div class="ai-progress-fill" id="aiProgressFill" style="width: 0%;"></div>
                         </div>
@@ -195,6 +199,13 @@
                         </div>
 
                         <div class="ai-milestones" id="aiMilestones"></div>
+
+                        <div class="ai-run-history">
+                            <h4>Recent Training Runs</h4>
+                            <div id="aiRunHistoryList" class="ai-run-history-list">
+                                <div class="ai-run-item empty">No training runs yet.</div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Recent Activity -->
