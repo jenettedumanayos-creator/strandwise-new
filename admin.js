@@ -245,8 +245,61 @@ async function loadDashboardData() {
         await uiAlert(`Failed to load dashboard stats: ${err.message}`, 'Request Failed');
     }
 
+    loadModelProgress();
     renderCharts();
     loadActivityFeed();
+}
+
+async function loadModelProgress() {
+    try {
+        const response = await apiRequest('/admin/model_progress.php', { method: 'GET' });
+        const data = response.data || {};
+
+        const percent = Number(data.progress_percent || 0);
+        const phase = data.current_phase || 'Data Preparation';
+        const datasetCount = Number(data.dataset_count || 0);
+        const classCoverage = Number(data.class_coverage || 0);
+        const weightedRows = Number(data.weighted_result_rows || 0);
+        const latestAccuracy = data.latest_model?.accuracy_score;
+        const milestones = Array.isArray(data.milestones) ? data.milestones : [];
+
+        const progressFill = document.getElementById('aiProgressFill');
+        const progressPercent = document.getElementById('aiProgressPercent');
+        const phaseEl = document.getElementById('aiCurrentPhase');
+        const datasetEl = document.getElementById('aiDatasetCount');
+        const classEl = document.getElementById('aiClassCoverage');
+        const rowsEl = document.getElementById('aiWeightedRows');
+        const accuracyEl = document.getElementById('aiLatestAccuracy');
+        const milestonesEl = document.getElementById('aiMilestones');
+
+        if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+        if (progressPercent) progressPercent.textContent = `${Math.round(percent)}%`;
+        if (phaseEl) phaseEl.textContent = `Phase: ${phase}`;
+        if (datasetEl) datasetEl.textContent = String(datasetCount);
+        if (classEl) classEl.textContent = `${classCoverage}/5`;
+        if (rowsEl) rowsEl.textContent = String(weightedRows);
+        if (accuracyEl) accuracyEl.textContent = latestAccuracy === null || latestAccuracy === undefined ? 'Pending' : `${latestAccuracy}%`;
+
+        if (milestonesEl) {
+            milestonesEl.innerHTML = milestones.map(item => {
+                const done = Boolean(item.done);
+                return `
+                    <div class="ai-milestone-item ${done ? 'done' : ''}">
+                        <div class="meta">
+                            <span class="title">${item.label}</span>
+                            <span class="sub">${item.current} | Target: ${item.target}</span>
+                        </div>
+                        <span class="ai-milestone-status">${done ? 'Done' : 'In Progress'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch (err) {
+        const milestonesEl = document.getElementById('aiMilestones');
+        if (milestonesEl) {
+            milestonesEl.innerHTML = `<div class="ai-milestone-item"><div class="meta"><span class="title">Failed to load AI progress</span><span class="sub">${err.message}</span></div><span class="ai-milestone-status">Error</span></div>`;
+        }
+    }
 }
 
 function updateStats(stats = {}) {

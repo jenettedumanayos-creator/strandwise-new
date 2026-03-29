@@ -163,6 +163,40 @@
                         </div>
                     </div>
 
+                    <!-- AI Training Progress -->
+                    <div class="activity-card ai-progress-card">
+                        <div class="ai-progress-header">
+                            <h3>AI Training Progress</h3>
+                            <button class="btn-small btn-info" onclick="loadModelProgress()">Refresh</button>
+                        </div>
+                        <p class="ai-progress-phase" id="aiCurrentPhase">Phase: Data Preparation</p>
+                        <div class="ai-progress-track">
+                            <div class="ai-progress-fill" id="aiProgressFill" style="width: 0%;"></div>
+                        </div>
+                        <div class="ai-progress-percent" id="aiProgressPercent">0%</div>
+
+                        <div class="ai-progress-metrics">
+                            <div class="ai-metric-item">
+                                <span class="label">Labeled Samples</span>
+                                <strong id="aiDatasetCount">0</strong>
+                            </div>
+                            <div class="ai-metric-item">
+                                <span class="label">Class Coverage</span>
+                                <strong id="aiClassCoverage">0/5</strong>
+                            </div>
+                            <div class="ai-metric-item">
+                                <span class="label">Weighted Rows</span>
+                                <strong id="aiWeightedRows">0</strong>
+                            </div>
+                            <div class="ai-metric-item">
+                                <span class="label">Latest Accuracy</span>
+                                <strong id="aiLatestAccuracy">Pending</strong>
+                            </div>
+                        </div>
+
+                        <div class="ai-milestones" id="aiMilestones"></div>
+                    </div>
+
                     <!-- Recent Activity -->
                     <div class="activity-card">
                         <h3>Recent Activity</h3>

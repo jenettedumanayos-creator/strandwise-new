@@ -369,6 +369,119 @@ body {
     margin-bottom: 2rem;
 }
 
+.ai-progress-card {
+    margin-bottom: 2rem;
+}
+
+.ai-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.ai-progress-phase {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-bottom: 0.85rem;
+}
+
+.ai-progress-track {
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    background: #e7edf8;
+    overflow: hidden;
+}
+
+.ai-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #5f7cff 0%, #45b97a 100%);
+    transition: width 0.3s ease;
+}
+
+.ai-progress-percent {
+    margin-top: 0.6rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.ai-progress-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ai-metric-item {
+    background: #f8fbff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.7rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.ai-metric-item .label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.ai-metric-item strong {
+    color: var(--text-dark);
+    font-size: 1rem;
+}
+
+.ai-milestones {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.ai-milestone-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    background: #ffffff;
+}
+
+.ai-milestone-item.done {
+    border-color: #bde8cf;
+    background: #f3fcf7;
+}
+
+.ai-milestone-item .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.ai-milestone-item .meta .title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.ai-milestone-item .meta .sub {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.ai-milestone-status {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--warning-color);
+}
+
+.ai-milestone-item.done .ai-milestone-status {
+    color: var(--success-color);
+}
+
 .activity-card h3 {
     margin-bottom: 1rem;
     color: var(--text-dark);
