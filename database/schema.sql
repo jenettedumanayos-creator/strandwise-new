@@ -242,10 +242,10 @@ ON DUPLICATE KEY UPDATE description = VALUES(description);
 
 INSERT INTO admins (first_name, last_name, email, password_hash, role, status, permissions, updated_at)
 VALUES (
+    'System',
     'Admin',
-    'Account',
-    'admin',
-    '$2y$10$/Yznao4L48JYZBROJXY1Tui1yhFtj50VOPbVm7iPY2Ou4dpa2TjBe',
+    'admin@gmail.com',
+    '$2y$10$iURCCaBioX5asJHklEJPuu/uDXFkkba8fxhTndYt43Gk6MdYAwGsW',
     'admin',
     'active',
     JSON_OBJECT('can_retrain_ai', true, 'can_edit_strands', true, 'can_manage_users', true),

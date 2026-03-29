@@ -308,20 +308,28 @@ body {
     transition: width 0.3s ease;
 }
 
-.strand-fill.science {
+.strand-fill.stem {
     background: linear-gradient(90deg, #3b82f6, #2E90DA);
 }
 
-.strand-fill.technology {
+.strand-fill.tvl-ict {
     background: linear-gradient(90deg, #7B68EE, #5B4BAA);
 }
 
-.strand-fill.business {
+.strand-fill.abm {
     background: linear-gradient(90deg, #f59e0b, #d97706);
 }
 
-.strand-fill.arts {
+.strand-fill.humss {
     background: linear-gradient(90deg, #ec4899, #be185d);
+}
+
+.strand-fill.gas {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.strand-fill.tvl-cookery {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
 .strand-percent {

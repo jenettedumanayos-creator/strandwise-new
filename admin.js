@@ -210,21 +210,14 @@ async function handleAddAssessmentSubmit(event) {
     const form = event.target;
     const formData = new FormData(form);
     const payload = Object.fromEntries(formData);
-    payload.total_questions = parseInt(payload.total_questions);
 
-    // Validate inputs
-    if (payload.name.length < 3) {
-        await uiAlert('Assessment name must be at least 3 characters', 'Validation');
+    if ((payload.question_text || '').trim().length < 10) {
+        await uiAlert('Question text must be at least 10 characters', 'Validation');
         return;
     }
 
-    if (payload.description.length < 10) {
-        await uiAlert('Assessment description must be at least 10 characters', 'Validation');
-        return;
-    }
-
-    if (payload.total_questions < 1 || payload.total_questions > 100) {
-        await uiAlert('Total questions must be between 1 and 100', 'Validation');
+    if ((payload.category || '').trim() === '') {
+        await uiAlert('Please select a category', 'Validation');
         return;
     }
 
@@ -234,11 +227,11 @@ async function handleAddAssessmentSubmit(event) {
             body: JSON.stringify(payload)
         });
 
-        uiToast('Assessment created successfully!', 'success');
+        uiToast('Question created successfully!', 'success');
         closeModal.call(form.closest('.modal').querySelector('.close-btn'));
-        loadAssessmentsTable(); // Refresh assessments table
+        loadAssessmentsTable();
     } catch (err) {
-        await uiAlert(`Failed to create assessment: ${err.message}`, 'Request Failed');
+        await uiAlert(`Failed to create question: ${err.message}`, 'Request Failed');
     }
 }
 
@@ -279,17 +272,19 @@ function renderStrandChart() {
 
     // Placeholder visualization until recommendation aggregation endpoint is added.
     const data = [
-        { name: 'Science', percent: 25 },
-        { name: 'Technology', percent: 25 },
-        { name: 'Business', percent: 25 },
-        { name: 'Arts', percent: 25 }
+        { name: 'STEM', classKey: 'stem', percent: 20 },
+        { name: 'TVL-ICT', classKey: 'tvl-ict', percent: 18 },
+        { name: 'ABM', classKey: 'abm', percent: 16 },
+        { name: 'HUMSS', classKey: 'humss', percent: 17 },
+        { name: 'GAS', classKey: 'gas', percent: 14 },
+        { name: 'TVL-COOKERY', classKey: 'tvl-cookery', percent: 15 }
     ];
 
     chart.innerHTML = data.map(item => `
         <div class="strand-bar">
             <div class="strand-label">${item.name}</div>
             <div class="strand-progress">
-                <div class="strand-fill ${item.name.toLowerCase()}" style="width: ${item.percent}%"></div>
+                <div class="strand-fill ${item.classKey}" style="width: ${item.percent}%"></div>
             </div>
             <div class="strand-percent">${item.percent}%</div>
         </div>
@@ -379,30 +374,37 @@ function loadAssessmentsTable() {
     const tbody = document.getElementById('assessmentsTableBody');
     if (!tbody) return;
 
-    apiRequest('/admin/assessments.php?limit=100', { method: 'GET' })
-        .then(response => {
-            const assessments = response.data || [];
+    const selectedCategory = document.getElementById('assessmentFilter')?.value || 'all';
+    const params = new URLSearchParams();
+    params.set('limit', '1000');
+    if (selectedCategory && selectedCategory !== 'all') {
+        params.set('category', selectedCategory);
+    }
 
-            tbody.innerHTML = assessments.map(item => `
+    apiRequest(`/admin/assessments.php?${params.toString()}`, { method: 'GET' })
+        .then(response => {
+            const questions = response.data || [];
+
+            tbody.innerHTML = questions.map(item => `
                 <tr>
-                    <td>A-${item.assessment_id}</td>
-                    <td>${item.assessment_name}</td>
-                    <td>${item.description || '-'}</td>
+                    <td>Q-${item.question_id}</td>
+                    <td>${item.question_text || '-'}</td>
+                    <td>${item.category || 'General'}</td>
                     <td>${item.responses ?? 0}</td>
                     <td><span class="badge success">Active</span></td>
                     <td>
-                        <button class="btn-small btn-info" onclick="editAssessment(${item.assessment_id})">Edit</button>
-                        <button class="btn-small btn-danger" onclick="deleteAssessment(${item.assessment_id})">Delete</button>
+                        <button class="btn-small btn-info" onclick="editAssessment(${item.question_id})">Edit</button>
+                        <button class="btn-small btn-danger" onclick="deleteAssessment(${item.question_id})">Delete</button>
                     </td>
                 </tr>
             `).join('');
 
-            if (assessments.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6">No assessments found.</td></tr>';
+            if (questions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No questions found.</td></tr>';
             }
         })
         .catch(err => {
-            tbody.innerHTML = `<tr><td colspan="6">Failed to load assessments: ${err.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6">Failed to load questions: ${err.message}</td></tr>`;
         });
 }
 
@@ -437,10 +439,12 @@ function filterAssessments(value) {
             return;
         }
 
-        const statusCell = row.querySelector('td:nth-child(5)');
-        const status = (statusCell?.textContent || '').toLowerCase();
-        row.style.display = status.includes(value.toLowerCase()) ? '' : 'none';
+        const categoryCell = row.querySelector('td:nth-child(3)');
+        const category = (categoryCell?.textContent || '').toLowerCase();
+        row.style.display = category.includes(value.toLowerCase()) ? '' : 'none';
     });
+
+    loadAssessmentsTable();
 }
 
 async function viewUserDetails(userId) {
@@ -531,45 +535,45 @@ async function viewAssessment(assessmentId) {
 
 async function editAssessment(assessmentId) {
     try {
-        const response = await apiRequest(`/admin/assessments.php?assessment_id=${encodeURIComponent(assessmentId)}`, { method: 'GET' });
-        const assessment = response.data || {};
+        const response = await apiRequest(`/admin/assessments.php?question_id=${encodeURIComponent(assessmentId)}`, { method: 'GET' });
+        const question = response.data || {};
 
-        const name = await uiPrompt('Assessment name', assessment.assessment_name || '', 'Edit Assessment');
-        if (name === null) return;
-        const description = await uiPrompt('Assessment description', assessment.description || '', 'Edit Assessment');
-        if (description === null) return;
+        const questionText = await uiPrompt('Question text', question.question_text || '', 'Edit Question');
+        if (questionText === null) return;
+        const category = await uiPrompt('Category', question.category || 'General', 'Edit Question');
+        if (category === null) return;
 
         await apiRequest('/admin/assessments.php', {
             method: 'PUT',
             body: JSON.stringify({
-                assessment_id: assessmentId,
-                name,
-                description
+                question_id: assessmentId,
+                question_text: questionText,
+                category
             })
         });
 
-        uiToast('Assessment updated successfully.', 'success');
+        uiToast('Question updated successfully.', 'success');
         loadAssessmentsTable();
     } catch (err) {
-        await uiAlert(`Failed to update assessment: ${err.message}`, 'Request Failed');
+        await uiAlert(`Failed to update question: ${err.message}`, 'Request Failed');
     }
 }
 
 async function deleteAssessment(assessmentId) {
-    if (!(await uiConfirm('Delete this assessment? This will also remove related assessment results.', 'Delete Assessment', 'Delete', 'Cancel'))) {
+    if (!(await uiConfirm('Delete this question? Related survey responses for this question will also be removed.', 'Delete Question', 'Delete', 'Cancel'))) {
         return;
     }
 
     try {
         await apiRequest('/admin/assessments.php', {
             method: 'DELETE',
-            body: JSON.stringify({ assessment_id: assessmentId })
+            body: JSON.stringify({ question_id: assessmentId })
         });
 
-        uiToast('Assessment deleted successfully.', 'success');
+        uiToast('Question deleted successfully.', 'success');
         loadAssessmentsTable();
     } catch (err) {
-        await uiAlert(`Failed to delete assessment: ${err.message}`, 'Request Failed');
+        await uiAlert(`Failed to delete question: ${err.message}`, 'Request Failed');
     }
 }
 

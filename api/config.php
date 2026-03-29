@@ -6,6 +6,12 @@ define('DB_NAME', 'strandwise');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
+// Default bootstrap admin credentials.
+define('DEFAULT_ADMIN_EMAIL', 'admin@gmail.com');
+define('DEFAULT_ADMIN_PASSWORD', 'administrator');
+define('DEFAULT_ADMIN_FIRST_NAME', 'System');
+define('DEFAULT_ADMIN_LAST_NAME', 'Admin');
+
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 function get_db_connection(): mysqli

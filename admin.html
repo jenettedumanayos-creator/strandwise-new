@@ -105,30 +105,44 @@
                             <h3>Strand Distribution</h3>
                             <div class="strand-chart">
                                 <div class="strand-bar">
-                                    <div class="strand-label">Science</div>
+                                    <div class="strand-label">STEM</div>
                                     <div class="strand-progress">
-                                        <div class="strand-fill science" style="width: 28%"></div>
+                                        <div class="strand-fill stem" style="width: 20%"></div>
                                     </div>
-                                    <div class="strand-percent">28%</div>
+                                    <div class="strand-percent">20%</div>
                                 </div>
                                 <div class="strand-bar">
-                                    <div class="strand-label">Technology</div>
+                                    <div class="strand-label">TVL-ICT</div>
                                     <div class="strand-progress">
-                                        <div class="strand-fill technology" style="width: 35%"></div>
+                                        <div class="strand-fill tvl-ict" style="width: 18%"></div>
                                     </div>
-                                    <div class="strand-percent">35%</div>
+                                    <div class="strand-percent">18%</div>
                                 </div>
                                 <div class="strand-bar">
-                                    <div class="strand-label">Business</div>
+                                    <div class="strand-label">ABM</div>
                                     <div class="strand-progress">
-                                        <div class="strand-fill business" style="width: 22%"></div>
+                                        <div class="strand-fill abm" style="width: 16%"></div>
                                     </div>
-                                    <div class="strand-percent">22%</div>
+                                    <div class="strand-percent">16%</div>
                                 </div>
                                 <div class="strand-bar">
-                                    <div class="strand-label">Arts & Humanities</div>
+                                    <div class="strand-label">HUMSS</div>
                                     <div class="strand-progress">
-                                        <div class="strand-fill arts" style="width: 15%"></div>
+                                        <div class="strand-fill humss" style="width: 17%"></div>
+                                    </div>
+                                    <div class="strand-percent">17%</div>
+                                </div>
+                                <div class="strand-bar">
+                                    <div class="strand-label">GAS</div>
+                                    <div class="strand-progress">
+                                        <div class="strand-fill gas" style="width: 14%"></div>
+                                    </div>
+                                    <div class="strand-percent">14%</div>
+                                </div>
+                                <div class="strand-bar">
+                                    <div class="strand-label">TVL-COOKERY</div>
+                                    <div class="strand-progress">
+                                        <div class="strand-fill tvl-cookery" style="width: 15%"></div>
                                     </div>
                                     <div class="strand-percent">15%</div>
                                 </div>
@@ -231,16 +245,18 @@
                 <!-- Assessments Section -->
                 <section id="assessments-section" class="section">
                     <div class="section-header">
-                        <h2>Assessments Management</h2>
-                        <button class="btn-primary" onclick="openAddAssessmentModal()">+ New Assessment</button>
+                        <h2>Question Management</h2>
+                        <button class="btn-primary" onclick="openAddAssessmentModal()">+ New Question</button>
                     </div>
 
                     <div class="filter-group">
                         <select id="assessmentFilter">
-                            <option value="">All Assessments</option>
-                            <option value="completed">Completed</option>
-                            <option value="pending">Pending</option>
-                            <option value="archived">Archived</option>
+                            <option value="all">All Categories</option>
+                            <option value="Part I: Academic Interests &amp; Strengths">Part I</option>
+                            <option value="Part II: Career Goals &amp; Future Plans">Part II</option>
+                            <option value="Part III: Personality &amp; Work Style">Part III</option>
+                            <option value="Part IV: Family Background &amp; Finances">Part IV</option>
+                            <option value="General">General</option>
                         </select>
                     </div>
 
@@ -248,9 +264,9 @@
                         <table class="admin-table">
                             <thead>
                                 <tr>
-                                    <th>Assessment ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
+                                    <th>Question ID</th>
+                                    <th>Question</th>
+                                    <th>Category</th>
                                     <th>Responses</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -259,8 +275,8 @@
                             <tbody id="assessmentsTableBody">
                                 <tr>
                                     <td>Q001</td>
-                                    <td>Interests</td>
                                     <td>Which subject do you find most enjoyable?</td>
+                                    <td>Part I</td>
                                     <td>342</td>
                                     <td><span class="badge success">Active</span></td>
                                     <td>
@@ -271,8 +287,8 @@
                                 </tr>
                                 <tr>
                                     <td>Q002</td>
-                                    <td>Career Goals</td>
                                     <td>Which career path interests you the most?</td>
+                                    <td>Part II</td>
                                     <td>328</td>
                                     <td><span class="badge success">Active</span></td>
                                     <td>
@@ -308,10 +324,12 @@
                         <div class="analytics-card">
                             <h3>Top Performing Strands</h3>
                             <ul class="analytics-list">
-                                <li><span>🥇 Technology</span><span class="stat">92%</span></li>
-                                <li><span>🥈 Science</span><span class="stat">87%</span></li>
-                                <li><span>🥉 Business</span><span class="stat">81%</span></li>
-                                <li><span>Arts</span><span class="stat">75%</span></li>
+                                <li><span>🥇 STEM</span><span class="stat">92%</span></li>
+                                <li><span>🥈 TVL-ICT</span><span class="stat">89%</span></li>
+                                <li><span>🥉 ABM</span><span class="stat">85%</span></li>
+                                <li><span>HUMSS</span><span class="stat">81%</span></li>
+                                <li><span>GAS</span><span class="stat">77%</span></li>
+                                <li><span>TVL-COOKERY</span><span class="stat">74%</span></li>
                             </ul>
                         </div>
 
@@ -514,25 +532,33 @@
     <div id="addAssessmentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Create New Assessment</h2>
+                <h2>Add New Question</h2>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="addAssessmentForm">
                     <div class="form-group">
-                        <label>Assessment Name*</label>
-                        <input type="text" name="name" required placeholder="Enter assessment name">
+                        <label>Question Text*</label>
+                        <textarea name="question_text" required placeholder="Enter full question text"
+                            rows="4"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Description*</label>
-                        <textarea name="description" required placeholder="Enter assessment description" rows="4"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Total Questions*</label>
-                        <input type="number" name="total_questions" required placeholder="Enter total number of questions" min="1" max="100">
+                        <label>Category*</label>
+                        <select name="category" required>
+                            <option value="">Select category</option>
+                            <option value="Part I: Academic Interests &amp; Strengths">Part I: Academic Interests &amp;
+                                Strengths</option>
+                            <option value="Part II: Career Goals &amp; Future Plans">Part II: Career Goals &amp; Future
+                                Plans</option>
+                            <option value="Part III: Personality &amp; Work Style">Part III: Personality &amp; Work
+                                Style</option>
+                            <option value="Part IV: Family Background &amp; Finances">Part IV: Family Background &amp;
+                                Finances</option>
+                            <option value="General">General</option>
+                        </select>
                     </div>
                     <div class="modal-actions">
-                        <button type="submit" class="btn-primary">Create Assessment</button>
+                        <button type="submit" class="btn-primary">Create Question</button>
                         <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
                     </div>
                 </form>

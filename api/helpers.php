@@ -72,10 +72,10 @@ function require_auth(): array
     $sessionAuthSource = $_SESSION['auth_source'] ?? 'users';
 
     return [
-        'user_id' => (int)$sessionUserId,
-        'role' => strtolower((string)$sessionRole),
-        'admin_id' => $sessionAdminId !== null ? (int)$sessionAdminId : null,
-        'auth_source' => strtolower((string)$sessionAuthSource)
+        'user_id' => (int) $sessionUserId,
+        'role' => strtolower((string) $sessionRole),
+        'admin_id' => $sessionAdminId !== null ? (int) $sessionAdminId : null,
+        'auth_source' => strtolower((string) $sessionAuthSource)
     ];
 }
 
@@ -89,4 +89,47 @@ function require_role(string $requiredRole): array
         ]);
     }
     return $auth;
+}
+
+function ensure_admins_table(mysqli $db): void
+{
+    $db->query(
+        'CREATE TABLE IF NOT EXISTS admins (
+            admin_id INT AUTO_INCREMENT PRIMARY KEY,
+            first_name VARCHAR(100) NOT NULL,
+            last_name VARCHAR(100) NOT NULL,
+            email VARCHAR(150) NOT NULL UNIQUE,
+            password_hash VARCHAR(255) NOT NULL,
+            role VARCHAR(50) NOT NULL DEFAULT "admin",
+            status VARCHAR(20) NOT NULL DEFAULT "active",
+            permissions JSON NULL,
+            last_login DATETIME NULL,
+            last_ip VARCHAR(45) NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_by INT NULL,
+            updated_at DATETIME NULL,
+            CONSTRAINT fk_admins_created_by FOREIGN KEY (created_by) REFERENCES admins(admin_id)
+                ON UPDATE CASCADE
+                ON DELETE SET NULL,
+            INDEX idx_admins_role (role),
+            INDEX idx_admins_status (status)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+}
+
+function ensure_default_admin(mysqli $db): void
+{
+    ensure_admins_table($db);
+
+    $defaultEmail = strtolower((string) (defined('DEFAULT_ADMIN_EMAIL') ? DEFAULT_ADMIN_EMAIL : 'admin@gmail.com'));
+    $defaultPassword = (string) (defined('DEFAULT_ADMIN_PASSWORD') ? DEFAULT_ADMIN_PASSWORD : 'administrator');
+    $defaultFirstName = (string) (defined('DEFAULT_ADMIN_FIRST_NAME') ? DEFAULT_ADMIN_FIRST_NAME : 'System');
+    $defaultLastName = (string) (defined('DEFAULT_ADMIN_LAST_NAME') ? DEFAULT_ADMIN_LAST_NAME : 'Admin');
+
+    $passwordHash = password_hash($defaultPassword, PASSWORD_DEFAULT);
+
+    $stmt = $db->prepare('INSERT INTO admins (first_name, last_name, email, password_hash, role, status, permissions, updated_at) VALUES (?, ?, ?, ?, "admin", "active", JSON_OBJECT("can_retrain_ai", true, "can_edit_strands", true, "can_manage_users", true), CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE first_name = VALUES(first_name), last_name = VALUES(last_name), password_hash = VALUES(password_hash), role = "admin", status = "active", permissions = VALUES(permissions), updated_at = CURRENT_TIMESTAMP');
+    $stmt->bind_param('ssss', $defaultFirstName, $defaultLastName, $defaultEmail, $passwordHash);
+    $stmt->execute();
+    $stmt->close();
 }

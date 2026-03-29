@@ -1,4 +1,5 @@
 const API_BASE = 'api';
+const DEFAULT_ADMIN_EMAIL = 'admin@gmail.com';
 
 function uiToast(message, type = 'info') {
     if (window.AppUI?.toast) {
@@ -43,25 +44,49 @@ function switchForm(formType, evt) {
     }
 }
 
+function setSelectedUserType(type) {
+    const userTypeInput = document.getElementById('userTypeInput');
+    const userTypeButtons = document.querySelectorAll('.user-type-btn');
+
+    userTypeButtons.forEach((btn) => {
+        const isActive = btn.getAttribute('data-type') === type;
+        btn.classList.toggle('active', isActive);
+    });
+
+    if (userTypeInput) {
+        userTypeInput.value = type;
+    }
+}
+
+function maybeAutoSelectAdminByEmail(email) {
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    if (normalizedEmail === DEFAULT_ADMIN_EMAIL) {
+        setSelectedUserType('admin');
+    }
+}
+
 // User Type Selector
 document.addEventListener('DOMContentLoaded', async function() {
     const userTypeButtons = document.querySelectorAll('.user-type-btn');
-    const userTypeInput = document.getElementById('userTypeInput');
+    const loginEmailInput = document.getElementById('loginEmail');
     
     userTypeButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            
-            // Remove active class from all buttons
-            userTypeButtons.forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to clicked button
-            this.classList.add('active');
-            
-            // Update hidden input value
-            userTypeInput.value = this.getAttribute('data-type');
+
+            setSelectedUserType(this.getAttribute('data-type'));
         });
     });
+
+    if (loginEmailInput) {
+        loginEmailInput.addEventListener('input', function() {
+            maybeAutoSelectAdminByEmail(this.value);
+        });
+
+        loginEmailInput.addEventListener('blur', function() {
+            maybeAutoSelectAdminByEmail(this.value);
+        });
+    }
 
     // If session already exists, redirect immediately based on role.
     try {
@@ -161,6 +186,8 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
     
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
+
+    maybeAutoSelectAdminByEmail(email);
     
     let isValid = true;
     
