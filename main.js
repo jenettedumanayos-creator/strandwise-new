@@ -1,6 +1,8 @@
 const API_BASE = 'api';
 let currentUser = null;
 let latestResultsData = null;
+let assessmentWizardInitialized = false;
+let autoAdvanceTimer = null;
 
 function uiAlert(message, title = 'Notice') {
     if (window.AppUI?.alert) {
@@ -80,6 +82,24 @@ function setStoredProgress(patch) {
     const next = { ...current, ...patch };
     localStorage.setItem(getProgressStorageKey(), JSON.stringify(next));
     return next;
+}
+
+function setResultsVisibility(hasResults) {
+    const emptyState = document.getElementById('noResultsState');
+    const academicTrackSection = document.getElementById('academicTrackSection');
+    const tvlTrackSection = document.getElementById('tvlTrackSection');
+
+    if (emptyState) {
+        emptyState.style.display = hasResults ? 'none' : 'block';
+    }
+
+    if (academicTrackSection) {
+        academicTrackSection.style.display = hasResults ? '' : 'none';
+    }
+
+    if (tvlTrackSection && !hasResults) {
+        tvlTrackSection.style.display = 'none';
+    }
 }
 
 function updateProgressUI(state = {}) {
@@ -181,6 +201,7 @@ async function syncProgressFromServer() {
         const stored = getStoredProgress();
 
         latestResultsData = hasResults ? results : null;
+        setResultsVisibility(hasResults);
 
         if (hasResults) {
             applyResultsSummaryToDashboard(results);
@@ -189,6 +210,7 @@ async function syncProgressFromServer() {
         updateProgressUI({ hasResults, explored: stored.explored });
     } catch (_err) {
         const stored = getStoredProgress();
+        setResultsVisibility(false);
         updateProgressUI({ hasResults: false, explored: stored.explored });
     }
 }
@@ -336,6 +358,15 @@ navLinks.forEach(link => {
             updateProgressUI({ hasResults, explored: true });
         }
 
+        if (sectionId === 'results') {
+            const hasResults = Boolean(latestResultsData?.domain_scores && Object.keys(latestResultsData.domain_scores).length > 0);
+            setResultsVisibility(hasResults);
+
+            if (hasResults) {
+                fetchAndDisplayResults();
+            }
+        }
+
         if (window.innerWidth <= 768) {
             const sidebar = document.getElementById('sidebar');
             if (sidebar) {
@@ -362,6 +393,15 @@ function mapOptionToDomain(optionIndex) {
     };
 
     return domainMap[optionIndex] || 'General';
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function collectAssessmentPayload() {
@@ -410,6 +450,84 @@ function collectAssessmentPayload() {
     };
 }
 
+function initAssessmentWizard() {
+    if (assessmentWizardInitialized) {
+        return;
+    }
+
+    const assessmentSection = document.getElementById('assessment-section');
+    if (!assessmentSection) {
+        return;
+    }
+
+    const questionCards = Array.from(assessmentSection.querySelectorAll('.question-card'));
+    const actionBtn = document.getElementById('assessmentActionBtn');
+    if (!questionCards.length || !actionBtn) {
+        return;
+    }
+
+    const lastIndex = questionCards.length - 1;
+    let currentIndex = 0;
+
+    const hasAnswer = (index) => {
+        const groupName = `question${index + 1}`;
+        return Boolean(assessmentSection.querySelector(`input[name="${groupName}"]:checked`));
+    };
+
+    const updateButtonState = () => {
+        actionBtn.textContent = currentIndex === lastIndex ? 'Submit' : 'Next';
+        actionBtn.disabled = !hasAnswer(currentIndex);
+    };
+
+    const showQuestion = (index) => {
+        currentIndex = Math.max(0, Math.min(index, lastIndex));
+        questionCards.forEach((card, idx) => {
+            card.classList.toggle('active-question', idx === currentIndex);
+        });
+        updateButtonState();
+        questionCards[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    actionBtn.addEventListener('click', async () => {
+        if (actionBtn.disabled) {
+            return;
+        }
+
+        if (currentIndex === lastIndex) {
+            await submitAssessment();
+            return;
+        }
+
+        showQuestion(currentIndex + 1);
+    });
+
+    questionCards.forEach((card, index) => {
+        const options = card.querySelectorAll('input[type="radio"]');
+        options.forEach((option) => {
+            option.addEventListener('change', () => {
+                if (index !== currentIndex) {
+                    return;
+                }
+
+                updateButtonState();
+
+                if (autoAdvanceTimer) {
+                    window.clearTimeout(autoAdvanceTimer);
+                }
+
+                if (index < lastIndex) {
+                    autoAdvanceTimer = window.setTimeout(() => {
+                        showQuestion(index + 1);
+                    }, 400);
+                }
+            });
+        });
+    });
+
+    showQuestion(0);
+    assessmentWizardInitialized = true;
+}
+
 async function fetchAndDisplayResults() {
     try {
         const response = await apiRequest('/student/get_results.php', { method: 'GET' });
@@ -419,10 +537,12 @@ async function fetchAndDisplayResults() {
 
         if (!results.domain_scores || Object.keys(results.domain_scores).length === 0) {
             console.warn('No domain scores in results');
+            setResultsVisibility(false);
             return;
         }
 
         latestResultsData = results;
+        setResultsVisibility(true);
 
         // Build strand info mapping
         const strandInfo = {
@@ -500,6 +620,7 @@ async function fetchAndDisplayResults() {
         }
 
         // Clear existing cards
+        academicResultsContainer.classList.add('dynamic-results');
         academicResultsContainer.innerHTML = '';
 
         // Sort domains by score (highest first)
@@ -509,9 +630,33 @@ async function fetchAndDisplayResults() {
         // Calculate max score for percentage
         const maxScore = Math.max(...Object.values(results.domain_scores), 1);
         const maxWeightedScore = Number(results.max_weighted_score || 54);
+        const chartColors = ['#F4DF4E', '#10C57A', '#F35678', '#57B3FF', '#9D8BFF', '#F59E0B'];
 
-        // Create result cards for each domain
-        sortedDomains.forEach(([domain, score]) => {
+        const topDecisionBasis = escapeHtml(results?.top_recommendation?.decision_basis || '');
+        const originalTopDomain = sortedDomains[0]?.[0] || null;
+
+        const buildResultCard = (entry, isTop = false) => {
+            const { domain, info, percentage, chartColor } = entry;
+            return `
+                <article class="result-card interactive-card ${isTop ? 'is-top-match is-selected' : 'is-compact'}" data-domain="${escapeHtml(domain)}" role="button" tabindex="0" aria-expanded="${isTop ? 'true' : 'false'}">
+                    <div class="result-summary">
+                        <div class="radial-progress" style="--radial-accent:${chartColor}; --radial-pct:${percentage};" aria-hidden="true">
+                            <svg class="radial-svg" viewBox="0 0 120 120" focusable="false" aria-hidden="true">
+                                <circle class="radial-track" cx="60" cy="60" r="46"></circle>
+                                <circle class="radial-value" cx="60" cy="60" r="46"></circle>
+                            </svg>
+                            <div class="radial-center">${percentage}%</div>
+                        </div>
+                        <div class="strand-meta">
+                            <h3>${info.icon} ${escapeHtml(info.title)}</h3>
+                            <p class="strand-subtitle">${escapeHtml(info.desc)}</p>
+                        </div>
+                    </div>
+                </article>
+            `;
+        };
+
+        const domainEntries = sortedDomains.map(([domain, score], index) => {
             const info = strandInfo[domain] || {
                 icon: '📖',
                 title: domain,
@@ -520,19 +665,76 @@ async function fetchAndDisplayResults() {
             };
 
             const percentage = Math.round((score / Math.max(maxWeightedScore, maxScore)) * 100);
-            const html = `
-                <div class="result-card">
-                    <h3>${info.icon} ${info.title}</h3>
-                    <p style="color: var(--text-light); margin-bottom: 1rem;">${info.desc}</p>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${percentage}%;"></div>
-                    </div>
-                    <p style="font-size: 0.9rem; color: var(--text-light); margin: 1rem 0;">${percentage}% Match</p>
-                    <p style="color: var(--text-light); font-size: 0.95rem;">${info.career}</p>
-                </div>
-            `;
-            academicResultsContainer.insertAdjacentHTML('beforeend', html);
+            const chartColor = chartColors[index % chartColors.length];
+            const explanationText = domain === originalTopDomain && topDecisionBasis
+                ? topDecisionBasis
+                : `${escapeHtml(info.career)} Score: ${percentage}% match based on your submitted responses.`;
+            return {
+                domain,
+                info,
+                percentage,
+                chartColor,
+                explanationText
+            };
         });
+
+        let activeDomain = domainEntries[0]?.domain || null;
+
+        academicResultsContainer.innerHTML = `
+            <div class="radial-results-dashboard">
+                <div class="radial-top-match-wrap"></div>
+                <div class="radial-other-strands"></div>
+            </div>
+        `;
+
+        const topMatchWrap = academicResultsContainer.querySelector('.radial-top-match-wrap');
+        const otherStrandsWrap = academicResultsContainer.querySelector('.radial-other-strands');
+
+        const renderAcademicDashboard = () => {
+            if (!topMatchWrap || !otherStrandsWrap || !activeDomain) {
+                return;
+            }
+
+            const activeEntry = domainEntries.find(item => item.domain === activeDomain) || domainEntries[0];
+            if (!activeEntry) {
+                return;
+            }
+
+            const remainingEntries = domainEntries.filter(item => item.domain !== activeEntry.domain);
+
+            topMatchWrap.innerHTML = `
+                ${buildResultCard(activeEntry, true)}
+                <aside class="fixed-explanation-panel" aria-live="polite">
+                    <span class="explanation-label">Why this strand fits</span>
+                    <h4>${escapeHtml(activeEntry.info.title)} Recommendation Insight</h4>
+                    <p>${activeEntry.explanationText}</p>
+                </aside>
+            `;
+
+            otherStrandsWrap.innerHTML = remainingEntries.map(entry => buildResultCard(entry, false)).join('');
+
+            const compactCards = otherStrandsWrap.querySelectorAll('.interactive-card.is-compact');
+            compactCards.forEach((card) => {
+                const onSelect = () => {
+                    const selectedDomain = card.getAttribute('data-domain');
+                    if (!selectedDomain || selectedDomain === activeDomain) {
+                        return;
+                    }
+                    activeDomain = selectedDomain;
+                    renderAcademicDashboard();
+                };
+
+                card.addEventListener('click', onSelect);
+                card.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        onSelect();
+                    }
+                });
+            });
+        };
+
+        renderAcademicDashboard();
 
         // Render TVL sub-track scores from real backend explanation payload.
         const tvlSubtracks = results.tvl_subtracks || {};
@@ -569,17 +771,24 @@ async function fetchAndDisplayResults() {
                 tvlTrackSection.style.display = '';
                 tvlResultsContainer.innerHTML = '';
 
-                available.forEach(item => {
+                available.forEach((item, idx) => {
                     const pct = Math.round(Number(item.data.percent) || 0);
+                    const chartColor = chartColors[(idx + 1) % chartColors.length];
                     const card = `
-                        <div class="result-card">
-                            <h3>${item.meta.icon} ${item.meta.title}</h3>
-                            <p style="color: var(--text-light); margin-bottom: 1rem;">${item.meta.desc}</p>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${pct}%;"></div>
+                        <div class="result-card tvl-circle-card">
+                            <div class="result-summary">
+                                <div class="radial-progress" style="--radial-accent:${chartColor}; --radial-pct:${pct};" aria-hidden="true">
+                                    <svg class="radial-svg" viewBox="0 0 120 120" focusable="false" aria-hidden="true">
+                                        <circle class="radial-track" cx="60" cy="60" r="46"></circle>
+                                        <circle class="radial-value" cx="60" cy="60" r="46"></circle>
+                                    </svg>
+                                    <div class="radial-center">${pct}%</div>
+                                </div>
+                                <h3>${item.meta.icon} ${item.meta.title}</h3>
+                                <p style="color: var(--text-light); margin: 0.6rem 0 0;">${item.meta.desc}</p>
                             </div>
-                            <p style="font-size: 0.9rem; color: var(--text-light); margin: 1rem 0;">${pct}% TVL Sub-track Match</p>
-                            <p style="color: var(--text-light); font-size: 0.95rem;">${item.meta.career}</p>
+                            <p class="tvl-caption">${pct}% TVL Sub-track Match</p>
+                            <p class="tvl-career">${item.meta.career}</p>
                         </div>
                     `;
                     tvlResultsContainer.insertAdjacentHTML('beforeend', card);
@@ -670,5 +879,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 window.addEventListener('DOMContentLoaded', async function () {
+    initAssessmentWizard();
     await navigateToDashboard();
 });

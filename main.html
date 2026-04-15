@@ -1178,12 +1178,20 @@
                         </div>
                     </div>
 
-                    <button class="submit-btn" onclick="submitAssessment()">Submit Assessment</button>
+                    <button class="submit-btn" id="assessmentActionBtn" type="button" disabled>Next</button>
                 </div>
             </section>
 
             <!-- Results Section -->
             <section class="content-section" id="results-section">
+                <div class="results-empty-state" id="noResultsState">
+                    <div class="results-empty-icon">📊</div>
+                    <h3>No Results Yet</h3>
+                    <p>Complete the assessment first to view your personalized strand recommendations.</p>
+                    <button class="btn-primary" onclick="scrollToSection('assessment-section')">Go to
+                        Assessment</button>
+                </div>
+
                 <!-- Academic Track -->
                 <div class="track-section" id="academicTrackSection">
                     <h2 class="track-title">📚 Academic Track</h2>

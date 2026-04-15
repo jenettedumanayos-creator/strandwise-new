@@ -65,8 +65,55 @@ function maybeAutoSelectAdminByEmail(email) {
     }
 }
 
+function initAuthCarousel() {
+    const carousel = document.querySelector('.auth-carousel');
+    if (!carousel) return;
+
+    const slides = carousel.querySelectorAll('.auth-carousel-slide');
+    if (slides.length < 2) return;
+
+    const images = [
+        'img/carousel/business1.jpg',
+        'img/carousel/business2.jpg',
+        'img/carousel/cooking.jpg',
+        'img/carousel/ict1.jpg',
+        'img/carousel/ict2.jpg',
+        'img/carousel/lab.jpg',
+        'img/carousel/school.jpg',
+        'img/carousel/stem1.jpg',
+        'img/carousel/stem2.jpg',
+        'img/carousel/stem3.jpg'
+    ];
+
+    let activeSlideIndex = 0;
+    let imageIndex = 0;
+
+    slides.forEach((slide, idx) => {
+        slide.style.backgroundImage = `url('${images[idx % images.length]}')`;
+        slide.classList.toggle('is-active', idx === 0);
+    });
+
+    imageIndex = slides.length % images.length;
+
+    window.setInterval(() => {
+        const nextSlideIndex = (activeSlideIndex + 1) % slides.length;
+        const outgoingSlide = slides[activeSlideIndex];
+        const incomingSlide = slides[nextSlideIndex];
+
+        incomingSlide.style.backgroundImage = `url('${images[imageIndex]}')`;
+        imageIndex = (imageIndex + 1) % images.length;
+
+        outgoingSlide.classList.remove('is-active');
+        incomingSlide.classList.add('is-active');
+
+        activeSlideIndex = nextSlideIndex;
+    }, 5000);
+}
+
 // User Type Selector
 document.addEventListener('DOMContentLoaded', async function() {
+    initAuthCarousel();
+
     const userTypeButtons = document.querySelectorAll('.user-type-btn');
     const loginEmailInput = document.getElementById('loginEmail');
     
