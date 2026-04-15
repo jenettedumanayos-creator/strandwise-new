@@ -528,6 +528,175 @@ function initAssessmentWizard() {
     assessmentWizardInitialized = true;
 }
 
+async function fetchDetailedExplanation() {
+    try {
+        const response = await apiRequest('/student/explain_recommendation.php', { method: 'GET' });
+        return response.data || null;
+    } catch (err) {
+        console.warn('Could not fetch detailed explanation:', err.message);
+        return null;
+    }
+}
+
+function renderPartAnalysis(part_analysis) {
+    if (!Array.isArray(part_analysis) || part_analysis.length === 0) {
+        return '';
+    }
+
+    let html = '<div class="explanation-parts" style="margin-top: 2rem;">';
+    html += '<h4 style="margin-bottom: 1.5rem; color: var(--primary);">How We Analyzed Your Profile</h4>';
+
+    part_analysis.forEach((part, idx) => {
+        html += `
+        <div class="part-analysis" style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid var(--primary);">
+            <h5 style="color: var(--primary); margin-bottom: 0.5rem;">${part.label}</h5>
+            <p style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 0.75rem;">${part.description}</p>
+            <div class="top-strand-matches">
+                ${part.top_strand_matches.map((match, i) => `
+                    <div style="background: white; padding: 0.5rem 0.75rem; border-radius: 0.3rem; margin-bottom: 0.5rem;">
+                        <strong style="color: var(--primary);">${match.strand}</strong> (${match.score} pts)
+                        <br><span style="font-size: 0.9rem; color: var(--text-light);">${match.interpretation}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        `;
+    });
+
+    html += '</div>';
+    return html;
+}
+
+function renderScoreRanking(score_ranking) {
+    if (!Array.isArray(score_ranking) || score_ranking.length === 0) {
+        return '';
+    }
+
+    let html = '<div class="score-ranking" style="margin-top: 2rem;">';
+    html += '<h4 style="margin-bottom: 1.5rem; color: var(--primary);">Your Strand Match Ranking</h4>';
+
+    score_ranking.forEach((item, idx) => {
+        const medalSymbol = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '→';
+        html += `
+        <div class="rank-item" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; background: white; padding: 0.75rem; border-radius: 0.5rem; border-left: 3px solid ${idx === 0 ? 'var(--primary)' : '#ddd'};">
+            <span style="font-size: 1.5rem; min-width: 2rem; text-align: center;">${medalSymbol}</span>
+            <div style="flex: 1;">
+                <strong>${item.strand}</strong>
+                <div style="font-size: 0.9rem; color: var(--text-light);">
+                    ${item.score} pts (${item.percent}%)
+                </div>
+            </div>
+        </div>
+        `;
+    });
+
+    html += '</div>';
+    return html;
+}
+
+function renderTvlSubtracks(tvl_subtracks) {
+    if (!tvl_subtracks || Object.keys(tvl_subtracks).length === 0) {
+        return '';
+    }
+
+    let html = '<div class="tvl-subtracks-detail" style="margin-top: 2rem;">';
+    html += '<h4 style="margin-bottom: 1.5rem; color: var(--primary);">TVL Sub-Track Breakdown</h4>';
+
+    const subtracks = ['ict', 'cookery', 'industrial'];
+    subtracks.forEach(key => {
+        if (tvl_subtracks[key]) {
+            const track = tvl_subtracks[key];
+            html += `
+            <div style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                <h5 style="color: var(--primary); margin-bottom: 0.5rem;">${track.name}</h5>
+                <div class="progress-bar" style="margin-bottom: 0.5rem;">
+                    <div class="progress-fill" style="width: ${(track.percent || 0)}%;"></div>
+                </div>
+                <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.5rem;">${track.percent}% - ${track.careers}</p>
+            </div>
+            `;
+        }
+    });
+
+    html += '</div>';
+    return html;
+}
+
+function renderDecisionPath(decision_path, requires_counselor_review) {
+    if (!Array.isArray(decision_path) || decision_path.length === 0) {
+        return '';
+    }
+
+    let html = '<div class="decision-path" style="margin-top: 2rem;">';
+    html += '<h4 style="margin-bottom: 1.5rem; color: var(--primary);">Decision Logic</h4>';
+
+    const warningStyle = requires_counselor_review ? 'background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;' : '';
+    if (requires_counselor_review) {
+        html += `<div style="${warningStyle}"><strong style="color: #856404;">⚠️ Counselor Review Recommended</strong><br><span style="font-size: 0.9rem; color: #856404;">Your profile shows mixed signals. Please discuss with a counselor.</span></div>`;
+    }
+
+    html += '<ol style="color: var(--text-light); margin-left: 1.5rem;">';
+    decision_path.forEach(step => {
+        html += `<li style="margin-bottom: 0.5rem;">${step}</li>`;
+    });
+    html += '</ol></div>';
+
+    return html;
+}
+
+async function displayDetailedExplanation() {
+    const explanation = await fetchDetailedExplanation();
+    if (!explanation) {
+        console.warn('No detailed explanation available');
+        return;
+    }
+
+    const container = document.getElementById('explanationContainer') 
+        || document.querySelector('#results-section .explanation-container')
+        || document.createElement('div');
+
+    if (!container.id) container.id = 'explanationContainer';
+
+    let explainerHtml = '<div class="detailed-explanation" style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-light); border-radius: 0.5rem;">';
+
+    if (explanation.strength_assessment) {
+        const strength = explanation.strength_assessment;
+        explainerHtml += `
+        <div class="strength-box" style="background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+            <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Assessment Strength: ${strength.strength_level}</h4>
+            <p style="color: var(--text-light); margin-bottom: 0.5rem;">${strength.interpretation}</p>
+            <p style="font-size: 0.9rem; color: #666; margin: 0;">Score Range: ${strength.score_range}</p>
+        </div>
+        `;
+    }
+
+    explainerHtml += renderPartAnalysis(explanation.part_analysis);
+    explainerHtml += renderScoreRanking(explanation.score_ranking);
+    explainerHtml += renderTvlSubtracks(explanation.tvl_subtracks);
+    explainerHtml += renderDecisionPath(explanation.decision_path, explanation.requires_counselor_review);
+
+    if (explanation.final_decision_basis) {
+        explainerHtml += `
+        <div class="final-basis" style="margin-top: 1.5rem; padding: 1rem; background: white; border-radius: 0.5rem; border-left: 4px solid var(--accent);">
+            <strong style="color: var(--accent);">Final Decision Basis</strong>
+            <p style="color: var(--text-light); font-size: 0.95rem; margin-top: 0.5rem;">${explanation.final_decision_basis}</p>
+        </div>
+        `;
+    }
+
+    explainerHtml += '</div>';
+
+    if (container.parentNode) {
+        container.innerHTML = explainerHtml;
+    } else {
+        const resultsSection = document.getElementById('results-section');
+        if (resultsSection) {
+            container.innerHTML = explainerHtml;
+            resultsSection.appendChild(container);
+        }
+    }
+}
+
 async function fetchAndDisplayResults() {
     try {
         const response = await apiRequest('/student/get_results.php', { method: 'GET' });
@@ -805,6 +974,13 @@ async function fetchAndDisplayResults() {
         applyResultsSummaryToDashboard(results);
         const stored = getStoredProgress();
         updateProgressUI({ hasResults: true, explored: stored.explored });
+
+        // Load and display detailed explanation
+        setTimeout(() => {
+            displayDetailedExplanation().catch(err => {
+                console.warn('Failed to load detailed explanation:', err);
+            });
+        }, 500);
     } catch (err) {
         console.error('Failed to fetch results:', err);
         console.error('Error details:', err.message);

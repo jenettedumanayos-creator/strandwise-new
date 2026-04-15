@@ -287,9 +287,9 @@ async function startModelTraining() {
     }
 
     const proceed = await uiConfirm(
-        'Start AI model training now? This uses current labeled recommendations and weighted rows.',
+        'Force AI model training now (override auto-training)? This uses current labeled recommendations and weighted rows.\n\nNote: Auto-training already runs automatically after each student assessment.',
         'Train Model',
-        'Start Training',
+        'Force Training',
         'Cancel'
     );
 
@@ -307,12 +307,12 @@ async function startModelTraining() {
     try {
         const response = await apiRequest('/admin/train_model.php', {
             method: 'POST',
-            body: JSON.stringify({ trigger: 'manual_dashboard' })
+            body: JSON.stringify({ trigger: 'manual_dashboard_override' })
         });
 
         const accuracy = response.data?.accuracy_score;
         const suffix = accuracy !== undefined && accuracy !== null ? ` Accuracy: ${accuracy}%.` : '';
-        uiToast(`Training finished successfully.${suffix}`, 'success');
+        uiToast(`Manual training completed successfully.${suffix}`, 'success');
     } catch (err) {
         await uiAlert(`Training failed: ${err.message}`, 'Training Failed');
     } finally {
@@ -362,10 +362,12 @@ async function loadModelProgress() {
             if (!latestRun) {
                 runStatusEl.textContent = 'Last run: none yet';
             } else {
+                const runType = latestRun.triggered_by_admin_id ? 'manual' : 'auto';
+                const typeIcon = runType === 'auto' ? '🤖' : '🔧';
                 const accText = latestRun.accuracy_score === null || latestRun.accuracy_score === undefined
                     ? 'n/a'
                     : `${latestRun.accuracy_score}%`;
-                runStatusEl.textContent = `Last run: ${latestRun.status} at ${formatDateTime(latestRun.finished_at || latestRun.started_at)} (accuracy: ${accText})`;
+                runStatusEl.innerHTML = `<strong>${typeIcon} Last ${runType} run:</strong> ${latestRun.status} at ${formatDateTime(latestRun.finished_at || latestRun.started_at)} (accuracy: ${accText})<br><small style="color: #666;">Auto-training is active: model trains automatically after each student assessment (≥5 new assessments or ≥6 hours since last training).</small>`;
             }
         }
 
@@ -852,6 +854,165 @@ async function logoutAdmin() {
     window.location.href = 'login.html';
 }
 
+// ============ QUALITY REVIEW: DECISION PATHS ============
+
+let currentDecisionPathPage = 1;
+let decisionPathsTotal = 0;
+
+async function loadDecisionPaths(page = 1) {
+    try {
+        const strand = document.getElementById('filterStrandSelect')?.value || '';
+        const confidence = document.getElementById('filterConfidence')?.value;
+        const counselor = document.getElementById('filterCounselor')?.value;
+
+        let query = `/admin/decision_paths.php?page=${page}&limit=10`;
+        if (strand) query += `&strand=${encodeURIComponent(strand)}`;
+        if (confidence) query += `&min_confidence=${parseFloat(confidence)}`;
+        if (counselor === 'yes') query += `&requires_counselor=1`;
+        else if (counselor === 'no') query += `&requires_counselor=0`;
+
+        const response = await apiRequest(query, { method: 'GET' });
+        const data = response.data || [];
+        const pagination = response.pagination || {};
+
+        currentDecisionPathPage = page;
+        decisionPathsTotal = pagination.total || 0;
+
+        renderDecisionPathsList(data, pagination);
+    } catch (err) {
+        await uiAlert(`Failed to load decision paths: ${err.message}`, 'Error');
+    }
+}
+
+function renderDecisionPathsList(paths, pagination) {
+    const container = document.getElementById('decisionPathsContainer');
+    if (!paths || paths.length === 0) {
+        container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;"><p>No decision paths found</p></div>';
+        document.getElementById('decisionPathsPagination').innerHTML = '';
+        return;
+    }
+
+    let html = '<table style="width: 100%; border-collapse: collapse;">';
+    html += '<thead style="background: #f5f5f5; border-bottom: 2px solid #ddd;"><tr>';
+    html += '<th style="padding: 1rem; text-align: left; border-right: 1px solid #ddd; font-weight: 600;">Student</th>';
+    html += '<th style="padding: 1rem; text-align: left; border-right: 1px solid #ddd; font-weight: 600;">Recommended</th>';
+    html += '<th style="padding: 1rem; text-align: left; border-right: 1px solid #ddd; font-weight: 600;">Confidence</th>';
+    html += '<th style="padding: 1rem; text-align: left; border-right: 1px solid #ddd; font-weight: 600;">Requires Review</th>';
+    html += '<th style="padding: 1rem; text-align: left; font-weight: 600;">Actions</th>';
+    html += '</tr></thead><tbody>';
+
+    paths.forEach((path, idx) => {
+        const reviewIcon = path.requires_counselor_review ? '⚠️ Yes' : '✓ No';
+        const reviewColor = path.requires_counselor_review ? '#d9534f' : '#5cb85c';
+        html += '<tr style="border-bottom: 1px solid #eee;">';
+        html += `<td style="padding: 1rem; border-right: 1px solid #eee;"><strong>${path.student_name}</strong><br><span style="font-size: 0.85rem; color: #999;">${path.student_email}</span></td>`;
+        html += `<td style="padding: 1rem; border-right: 1px solid #eee;"><strong>${path.recommended_strand}</strong><br><span style="font-size: 0.85rem; color: #999;">${path.strand_name}</span></td>`;
+        html += `<td style="padding: 1rem; border-right: 1px solid #eee;"><strong>${path.confidence_score}%</strong></td>`;
+        html += `<td style="padding: 1rem; border-right: 1px solid #eee; color: ${reviewColor};"><strong>${reviewIcon}</strong></td>`;
+        html += `<td style="padding: 1rem;"><button class="btn-small" onclick="viewDecisionDetails(${path.recommendation_id})">View Details</button></td>`;
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+    renderPagination(pagination);
+}
+
+function renderPagination(pagination) {
+    const container = document.getElementById('decisionPathsPagination');
+    if (!pagination || pagination.total_pages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+    if (pagination.page > 1) {
+        html += `<button class="btn-secondary" onclick="loadDecisionPaths(1)">« First</button>`;
+        html += `<button class="btn-secondary" onclick="loadDecisionPaths(${pagination.page - 1})">‹ Prev</button>`;
+    }
+
+    html += `<span style="padding: 0.5rem 1rem; align-self: center;">Page ${pagination.page} of ${pagination.total_pages}</span>`;
+
+    if (pagination.page < pagination.total_pages) {
+        html += `<button class="btn-secondary" onclick="loadDecisionPaths(${pagination.page + 1})">Next ›</button>`;
+        html += `<button class="btn-secondary" onclick="loadDecisionPaths(${pagination.total_pages})">Last »</button>`;
+    }
+
+    container.innerHTML = html;
+}
+
+async function viewDecisionDetails(recommendationId) {
+    try {
+        const response = await apiRequest(`/admin/decision_paths.php?recommendation_id=${recommendationId}`, { method: 'GET' });
+        const path = (response.data && Array.isArray(response.data) && response.data.length > 0) ? response.data[0] : null;
+
+        if (!path) {
+            await uiAlert('Decision path not found', 'Not Found');
+            return;
+        }
+
+        let details = `
+<strong>Student:</strong> ${path.student_name} (${path.student_email})<br>
+<strong>Recommended Strand:</strong> ${path.recommended_strand} - ${path.strand_name}<br>
+<strong>Confidence Score:</strong> ${path.confidence_score}%<br>
+<strong>Generated:</strong> ${new Date(path.date_generated).toLocaleString()}<br>
+<br>
+<strong>Assessment Strength:</strong> ${path.score_band?.strength_level || 'N/A'}<br>
+<strong>Requires Counselor Review:</strong> ${path.requires_counselor_review ? 'Yes' : 'No'}<br>
+<br>
+<strong>Decision Path:</strong><br>
+${(path.decision_path || []).map(step => `• ${step}`).join('<br>')}<br>
+<br>
+<strong>Final Decision Basis:</strong><br>
+${path.decision_basis || 'N/A'}<br>
+${path.tvl_subtracks ? `<br><strong>TVL Sub-tracks:</strong><br>${
+    Object.entries(path.tvl_subtracks).map(([key, data]) => 
+        `${data.name}: ${data.percent}%`
+    ).join('<br>')
+}` : ''}
+        `;
+
+        await uiAlert(details, 'Decision Details');
+    } catch (err) {
+        await uiAlert(`Failed to load details: ${err.message}`, 'Error');
+    }
+}
+
+async function exportDecisionPaths() {
+    try {
+        const strand = document.getElementById('filterStrandSelect')?.value || '';
+        const confidence = document.getElementById('filterConfidence')?.value;
+        const counselor = document.getElementById('filterCounselor')?.value;
+
+        let query = `/admin/decision_paths.php?limit=1000`;
+        if (strand) query += `&strand=${encodeURIComponent(strand)}`;
+        if (confidence) query += `&min_confidence=${parseFloat(confidence)}`;
+        if (counselor === 'yes') query += `&requires_counselor=1`;
+        else if (counselor === 'no') query += `&requires_counselor=0`;
+
+        const response = await apiRequest(query, { method: 'GET' });
+        const data = response.data || [];
+
+        let csv = 'Student Name,Email,Recommended Strand,Confidence,Requires Review,Date Generated\n';
+        data.forEach(path => {
+            csv += `"${path.student_name}","${path.student_email}","${path.recommended_strand}","${path.confidence_score}%","${path.requires_counselor_review ? 'Yes' : 'No'}","${path.date_generated}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `decision_paths_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        uiToast('Decision paths exported successfully', 'success');
+    } catch (err) {
+        await uiAlert(`Export failed: ${err.message}`, 'Error');
+    }
+}
+
 // ============ AUTO-LOAD SECTIONS ============
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -871,6 +1032,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else if (sectionId === 'reports-section') {
                         stopAiProgressAutoRefresh();
                         loadReportsData();
+                    } else if (sectionId === 'quality-section') {
+                        stopAiProgressAutoRefresh();
+                        loadDecisionPaths();
                     } else if (sectionId === 'settings-section') {
                         stopAiProgressAutoRefresh();
                         initializeSettings();

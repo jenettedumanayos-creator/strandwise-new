@@ -40,6 +40,41 @@ function option_to_strand(int $rating): ?string
     return $map[$rating] ?? null;
 }
 
+function trigger_auto_training_async($studentId): void
+{
+    // Trigger model auto-training without blocking the response.
+    // This function makes a non-blocking HTTP call to the auto_train endpoint.
+    
+    $autoTrainUrl = 'http://localhost/strandwise/api/admin/auto_train.php';
+    
+    // Use curl for non-blocking async call (if available)
+    if (function_exists('curl_init')) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $autoTrainUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
+        curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        
+        // Ignore the response; just trigger the request
+        @curl_exec($ch);
+        curl_close($ch);
+    } else {
+        // Fallback: use file_get_contents with timeout
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 5,
+                'ignore_errors' => true
+            ]
+        ]);
+        @file_get_contents($autoTrainUrl, false, $context);
+    }
+    
+    error_log("[AUTO-TRAIN] Auto-training triggered after student $studentId submitted assessment");
+}
+
 function resolve_part_key(int $questionNumber): string
 {
     foreach (rubric_parts() as $partKey => $cfg) {
@@ -566,6 +601,9 @@ try {
     $stmt->close();
 
     $db->commit();
+
+    // Trigger automatic model training in background (non-blocking)
+    trigger_auto_training_async($studentId);
 
     json_response(201, [
         'success' => true,
