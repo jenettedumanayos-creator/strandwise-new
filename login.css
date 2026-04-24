@@ -5,20 +5,20 @@
 }
 
 :root {
-    --primary: #6C63FF;
-    --primary-light: #8B85FF;
-    --primary-dark: #4A42CC;
-    --secondary: #9D8BFF;
-    --accent: #F59E0B;
-    --success: #10B981;
-    --danger: #EF4444;
-    --dark-bg: #1a1a2e;
-    --dark-card: #16213e;
-    --text-dark: #0F172A;
-    --text-light: #64748B;
-    --border-light: #E2E8F0;
-    --border-dark: #CBD5E1;
-    --white: #FFFFFF;
+    --primary: #111111;
+    --primary-light: #2a2a2a;
+    --primary-dark: #000000;
+    --secondary: #6b6b6b;
+    --accent: #d6cfc4;
+    --success: #111111;
+    --danger: #4b4b4b;
+    --dark-bg: #111111;
+    --dark-card: #1a1a1a;
+    --text-dark: #0f172a;
+    --text-light: #64748b;
+    --border-light: #e2e8f0;
+    --border-dark: #cbd5e1;
+    --white: #ffffff;
 }
 
 html, body {
@@ -41,7 +41,7 @@ html, body {
 
 .auth-panel-left {
     flex: 1;
-    background: #1E0A47;
+    background: #111111;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -195,7 +195,7 @@ html, body {
 .user-type-selector {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background-color: #F8F9FA;
+    background-color: #f5f5f5;
     border-radius: 8px;
 }
 
@@ -236,7 +236,7 @@ html, body {
 
 .user-type-btn:hover {
     border-color: var(--primary);
-    background-color: #F8F9FF;
+    background-color: #f5f5f5;
 }
 
 .user-type-btn.active {
@@ -289,7 +289,7 @@ html, body {
 .form-group select:focus {
     outline: none;
     border-color: var(--primary);
-    background-color: #F8F9FF;
+    background-color: #f5f5f5;
     box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
 }
 
@@ -488,7 +488,7 @@ html, body {
 
 .social-btn:hover {
     border-color: var(--primary);
-    background-color: #F8F9FF;
+    background-color: #f5f5f5;
 }
 
 .google-btn {
@@ -501,9 +501,9 @@ html, body {
 }
 
 .apple-btn {
-    background: #000;
+    background: #111111;
     color: var(--white);
-    border-color: #000;
+    border-color: #111111;
 }
 
 .apple-btn::before {
@@ -512,8 +512,8 @@ html, body {
 }
 
 .apple-btn:hover {
-    background: #1a1a1a;
-    border-color: #1a1a1a;
+    background: #222222;
+    border-color: #222222;
 }
 
 /* ============ CHECKBOXES ============ */
@@ -615,6 +615,219 @@ html, body {
 
     .social-buttons {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Editorial monochrome refresh */
+:root {
+    --primary: #111111;
+    --primary-light: #2a2a2a;
+    --primary-dark: #000000;
+    --secondary: #767676;
+    --secondary-light: #9a9a9a;
+    --secondary-dark: #4f4f4f;
+    --accent: #d6cfc4;
+    --success: #111111;
+    --danger: #7a1f1f;
+    --dark-bg: #111111;
+    --dark-card: #191919;
+    --text-dark: #111111;
+    --text-light: #6c6c6c;
+    --border-light: #ddd6ca;
+    --border-dark: #c9c1b4;
+    --white: #ffffff;
+}
+
+html, body {
+    background: #f5f1ea;
+    color: var(--text-dark);
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.55), transparent 28%),
+        radial-gradient(circle at 85% 80%, rgba(0, 0, 0, 0.035), transparent 30%);
+}
+
+.auth-container {
+    background: #f5f1ea;
+}
+
+.auth-panel-left {
+    background: linear-gradient(180deg, #111111 0%, #161616 100%);
+}
+
+.auth-panel-left::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent 35%),
+        radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.06), transparent 24%),
+        radial-gradient(circle at 85% 80%, rgba(255, 255, 255, 0.04), transparent 22%);
+}
+
+.auth-branding {
+    align-items: flex-start;
+    text-align: left;
+    max-width: 460px;
+    padding: 0 1rem;
+}
+
+.auth-logo-large {
+    margin-bottom: 2rem;
+}
+
+.auth-logo-large img {
+    width: 72px;
+    height: 72px;
+}
+
+.auth-tagline h1,
+.form-header h2 {
+    font-family: Georgia, "Times New Roman", Times, serif;
+    letter-spacing: -0.03em;
+}
+
+.auth-tagline h1 {
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+    line-height: 0.98;
+    margin-bottom: 1rem;
+    max-width: 8ch;
+}
+
+.auth-tagline p {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.72);
+    max-width: 26rem;
+}
+
+.auth-panel-right {
+    background: #fbf8f3;
+    border-left: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.auth-form {
+    max-width: 460px;
+}
+
+.form-header h2 {
+    font-size: clamp(2rem, 3vw, 2.75rem);
+    margin-bottom: 0.35rem;
+}
+
+.form-header p,
+.selector-title,
+.remember-me,
+.forgot-password,
+.error-message,
+.form-divider {
+    color: var(--text-light);
+}
+
+.user-type-selector {
+    background: #f2eee7;
+    border: 1px solid var(--border-light);
+    border-radius: 18px;
+}
+
+.user-type-btn {
+    border-radius: 14px;
+    border-color: rgba(17, 17, 17, 0.12);
+    background: #ffffff;
+}
+
+.user-type-btn.active {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+    box-shadow: none;
+}
+
+.form-group input,
+.form-group select {
+    background: #ffffff;
+    border-radius: 14px;
+    border-color: rgba(17, 17, 17, 0.14);
+    box-shadow: 0 1px 0 rgba(17, 17, 17, 0.02);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #111111;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+}
+
+.primary-btn {
+    background: #111111;
+    color: #ffffff;
+    box-shadow: none;
+    border-radius: 14px;
+}
+
+.primary-btn:hover {
+    background: #222222;
+    box-shadow: none;
+}
+
+.social-btn {
+    border-radius: 14px;
+    border-color: rgba(17, 17, 17, 0.14);
+}
+
+.google-btn {
+    background: #ffffff;
+}
+
+.apple-btn {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+}
+
+.apple-btn:hover,
+.google-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(17, 17, 17, 0.08);
+}
+
+.form-divider::before,
+.form-divider::after {
+    background-color: rgba(17, 17, 17, 0.12);
+}
+
+.toggle-password {
+    color: var(--text-light);
+}
+
+.remember-me input[type="checkbox"],
+.checkbox-label input[type="checkbox"] {
+    accent-color: #111111;
+}
+
+@media (max-width: 768px) {
+    .auth-panel-left {
+        min-height: 240px;
+    }
+
+    .auth-branding {
+        align-items: center;
+        text-align: center;
+        padding: 0;
+    }
+
+    .auth-tagline h1 {
+        max-width: none;
     }
 }
 

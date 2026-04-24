@@ -1,7 +1,7 @@
 .app-ui-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(10, 18, 36, 0.55);
+    background: rgba(17, 17, 17, 0.55);
     backdrop-filter: blur(2px);
     z-index: 2000;
     display: none;
@@ -17,10 +17,10 @@
 .app-ui-modal {
     width: min(520px, 100%);
     background: #ffffff;
-    color: #102238;
+    color: #111111;
     border-radius: 16px;
-    box-shadow: 0 24px 60px rgba(9, 22, 48, 0.24);
-    border: 1px solid #d9e3f3;
+    box-shadow: 0 24px 60px rgba(17, 17, 17, 0.24);
+    border: 1px solid #dddddd;
     overflow: hidden;
 }
 
@@ -32,7 +32,7 @@
     margin: 0;
     font-size: 1.15rem;
     font-weight: 700;
-    color: #142b4f;
+    color: #111111;
 }
 
 .app-ui-body {
@@ -43,7 +43,7 @@
     margin: 0;
     line-height: 1.55;
     white-space: pre-wrap;
-    color: #28415f;
+    color: #444444;
 }
 
 .app-ui-input-wrap {
@@ -54,7 +54,7 @@
     display: block;
     margin-bottom: 0.4rem;
     font-size: 0.9rem;
-    color: #375273;
+    color: #555555;
     font-weight: 600;
 }
 
@@ -62,15 +62,15 @@
     width: 100%;
     padding: 0.75rem 0.9rem;
     border-radius: 10px;
-    border: 1px solid #c3d2ea;
+    border: 1px solid #cccccc;
     font-size: 0.95rem;
-    color: #102238;
+    color: #111111;
     outline: none;
 }
 
 .app-ui-input:focus {
-    border-color: #5f7cff;
-    box-shadow: 0 0 0 3px rgba(95, 124, 255, 0.16);
+    border-color: #111111;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.16);
 }
 
 .app-ui-footer {
@@ -78,7 +78,7 @@
     justify-content: flex-end;
     gap: 0.65rem;
     padding: 0.9rem 1.25rem 1.15rem;
-    border-top: 1px solid #e4ecfa;
+    border-top: 1px solid #dddddd;
 }
 
 .app-ui-btn {
@@ -91,12 +91,12 @@
 }
 
 .app-ui-btn-secondary {
-    background: #edf2fc;
-    color: #294768;
+    background: #f2f2f2;
+    color: #111111;
 }
 
 .app-ui-btn-primary {
-    background: linear-gradient(90deg, #5868ec 0%, #7478ff 100%);
+    background: linear-gradient(90deg, #111111 0%, #4a4a4a 100%);
     color: #ffffff;
 }
 
@@ -114,9 +114,9 @@
     min-width: 240px;
     max-width: 360px;
     background: #ffffff;
-    border: 1px solid #d5e0f2;
-    border-left: 4px solid #617bff;
-    color: #1d3552;
+    border: 1px solid #dddddd;
+    border-left: 4px solid #111111;
+    color: #111111;
     border-radius: 12px;
     box-shadow: 0 12px 32px rgba(10, 24, 50, 0.16);
     padding: 0.7rem 0.8rem;
@@ -124,15 +124,15 @@
 }
 
 .app-ui-toast-success {
-    border-left-color: #1ea47b;
+    border-left-color: #111111;
 }
 
 .app-ui-toast-error {
-    border-left-color: #de4f4f;
+    border-left-color: #444444;
 }
 
 .app-ui-toast-warning {
-    border-left-color: #d6852e;
+    border-left-color: #777777;
 }
 
 @media (max-width: 640px) {

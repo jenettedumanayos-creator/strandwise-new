@@ -1,13 +1,13 @@
 /* ============ ADMIN DASHBOARD STYLES ============ */
 
 :root {
-    --primary-color: #2E5090;
-    --secondary-color: #7B68EE;
-    --success-color: #22c55e;
-    --danger-color: #ef4444;
-    --warning-color: #f59e0b;
-    --info-color: #3b82f6;
-    --bg-dark: #0f172a;
+    --primary-color: #111111;
+    --secondary-color: #4d4d4d;
+    --success-color: #111111;
+    --danger-color: #4b4b4b;
+    --warning-color: #6b6b6b;
+    --info-color: #2d2d2d;
+    --bg-dark: #111111;
     --bg-light: #f3f4f6;
     --text-dark: #1e293b;
     --text-light: #64748b;
@@ -37,7 +37,7 @@ body {
 
 .admin-sidebar {
     width: 260px;
-    background: linear-gradient(135deg, #1e3557 0%, #2e5090 100%);
+    background: linear-gradient(135deg, #111111 0%, #4a4a4a 100%);
     color: white;
     display: flex;
     flex-direction: column;
@@ -83,7 +83,7 @@ body {
 .nav-link:hover,
 .nav-link.active {
     background-color: rgba(255, 255, 255, 0.1);
-    border-left-color: #7B68EE;
+    border-left-color: #111111;
     color: white;
 }
 
@@ -151,7 +151,7 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7B68EE, #2E5090);
+    background: linear-gradient(135deg, #1f1f1f, #4a4a4a);
     color: white;
     display: flex;
     align-items: center;
@@ -309,27 +309,27 @@ body {
 }
 
 .strand-fill.stem {
-    background: linear-gradient(90deg, #3b82f6, #2E90DA);
+    background: linear-gradient(90deg, #4a4a4a, #2a2a2a);
 }
 
 .strand-fill.tvl-ict {
-    background: linear-gradient(90deg, #7B68EE, #5B4BAA);
+    background: linear-gradient(90deg, #4a4a4a, #2f2f2f);
 }
 
 .strand-fill.abm {
-    background: linear-gradient(90deg, #f59e0b, #d97706);
+    background: linear-gradient(90deg, #6a6a6a, #3a3a3a);
 }
 
 .strand-fill.humss {
-    background: linear-gradient(90deg, #ec4899, #be185d);
+    background: linear-gradient(90deg, #6a6a6a, #3a3a3a);
 }
 
 .strand-fill.gas {
-    background: linear-gradient(90deg, #10b981, #059669);
+    background: linear-gradient(90deg, #6a6a6a, #3a3a3a);
 }
 
 .strand-fill.tvl-cookery {
-    background: linear-gradient(90deg, #ef4444, #dc2626);
+    background: linear-gradient(90deg, #6a6a6a, #3a3a3a);
 }
 
 .strand-percent {
@@ -350,7 +350,7 @@ body {
 
 .day-bar {
     width: 100%;
-    background: linear-gradient(180deg, var(--secondary-color), #9B8FEE);
+    background: linear-gradient(180deg, var(--secondary-color), #2d2d2d);
     border-radius: 6px 6px 0 0;
     transition: opacity 0.3s ease;
 }
@@ -412,7 +412,7 @@ body {
 
 .ai-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #5f7cff 0%, #45b97a 100%);
+    background: linear-gradient(90deg, #4a4a4a 0%, #1f1f1f 100%);
     transition: width 0.3s ease;
 }
 
@@ -431,7 +431,7 @@ body {
 }
 
 .ai-metric-item {
-    background: #f8fbff;
+    background: #f7f7f7;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     padding: 0.7rem 0.8rem;
@@ -467,8 +467,8 @@ body {
 }
 
 .ai-milestone-item.done {
-    border-color: #bde8cf;
-    background: #f3fcf7;
+    border-color: #dddddd;
+    background: #f7f7f7;
 }
 
 .ai-milestone-item .meta {
@@ -545,16 +545,16 @@ body {
 .ai-run-item .status {
     font-size: 0.8rem;
     font-weight: 700;
-    color: #2563eb;
+    color: #111111;
     text-transform: uppercase;
 }
 
 .ai-run-item.completed .status {
-    color: #16a34a;
+    color: #111111;
 }
 
 .ai-run-item.failed .status {
-    color: #dc2626;
+    color: #4b4b4b;
 }
 
 .ai-run-item.empty {
@@ -619,7 +619,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #1e3557;
+    background-color: #222222;
     transform: translateY(-2px);
 }
 
@@ -629,7 +629,7 @@ body {
 }
 
 .btn-secondary:hover {
-    background-color: #2563eb;
+    background-color: #222222;
 }
 
 .btn-danger {
@@ -638,7 +638,7 @@ body {
 }
 
 .btn-danger:hover {
-    background-color: #dc2626;
+    background-color: #222222;
 }
 
 .btn-info {
@@ -771,7 +771,7 @@ body {
     width: 150px;
     height: 150px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--secondary-color), #2E5090);
+    background: linear-gradient(135deg, var(--secondary-color), #2d2d2d);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1088,5 +1088,292 @@ body {
 
     .admin-table {
         min-width: 600px;
+    }
+}
+
+/* Editorial monochrome refresh */
+:root {
+    --primary-color: #111111;
+    --secondary-color: #4d4d4d;
+    --success-color: #111111;
+    --danger-color: #5f2a2a;
+    --warning-color: #8a6d3b;
+    --info-color: #2d2d2d;
+    --bg-dark: #111111;
+    --bg-light: #f5f1ea;
+    --text-dark: #111111;
+    --text-light: #666666;
+    --border-color: #ddd6ca;
+    --shadow: 0 8px 24px rgba(17, 17, 17, 0.06);
+}
+
+html,
+body {
+    background: #f5f1ea;
+    color: var(--text-dark);
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.58), transparent 24%),
+        radial-gradient(circle at 86% 82%, rgba(0, 0, 0, 0.04), transparent 28%);
+}
+
+h1, h2, h3, h4, h5,
+.section-header h2,
+.topbar-left h1,
+.stat-content h3,
+.chart-card h3,
+.activity-card h3,
+.analytics-card h3,
+.report-card h3,
+.settings-group h3 {
+    font-family: Georgia, "Times New Roman", Times, serif;
+    letter-spacing: -0.03em;
+}
+
+.admin-container {
+    background: #f5f1ea;
+}
+
+.admin-sidebar {
+    background: linear-gradient(180deg, #111111 0%, #171717 100%);
+    box-shadow: 2px 0 24px rgba(17, 17, 17, 0.18);
+}
+
+.admin-logo span,
+.nav-link,
+.btn-logout {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.nav-link {
+    border-left-color: transparent;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.08);
+    border-left-color: #ffffff;
+    color: #ffffff;
+}
+
+.admin-footer {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.btn-logout {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+}
+
+.btn-logout:hover {
+    background: #ffffff;
+    color: #111111;
+    border-color: #ffffff;
+}
+
+.admin-main {
+    background: transparent;
+}
+
+.admin-topbar {
+    margin: 1.25rem 1.25rem 0;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+}
+
+.admin-content {
+    padding: 1.25rem;
+}
+
+.section {
+    animation: none;
+}
+
+.section-header h2 {
+    font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+}
+
+.section-header p {
+    color: var(--text-light);
+}
+
+.stat-card,
+.chart-card,
+.activity-card,
+.analytics-card,
+.report-card,
+.reports-history,
+.settings-container,
+.table-responsive,
+.modal-content {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+}
+
+.stat-card:hover,
+.chart-card:hover,
+.activity-card:hover,
+.analytics-card:hover,
+.report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(17, 17, 17, 0.08);
+}
+
+.stat-card {
+    background: linear-gradient(180deg, #ffffff 0%, #faf8f3 100%);
+    border-left-color: #111111;
+}
+
+.stat-number {
+    color: #111111;
+}
+
+.strand-progress,
+.ai-progress-track {
+    background-color: #efe9df;
+}
+
+.strand-fill.stem,
+.strand-fill.tvl-ict,
+.strand-fill.abm,
+.strand-fill.humss,
+.strand-fill.gas,
+.strand-fill.tvl-cookery,
+.ai-progress-fill,
+.day-bar {
+    background: linear-gradient(180deg, #2a2a2a 0%, #111111 100%);
+}
+
+.admin-table thead {
+    background-color: #f3eee6;
+}
+
+.admin-table th,
+.admin-table td {
+    border-bottom-color: var(--border-color);
+}
+
+.admin-table tbody tr:hover {
+    background-color: #faf8f3;
+}
+
+.badge.active,
+.badge.success,
+.badge.warning,
+.badge.danger {
+    background-color: rgba(17, 17, 17, 0.06);
+    color: #111111;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-info,
+.btn-danger,
+.btn-small {
+    border-radius: 999px;
+    box-shadow: none;
+}
+
+.btn-primary {
+    background: #111111;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #222222;
+}
+
+.btn-secondary,
+.btn-info,
+.btn-small {
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid var(--border-color);
+}
+
+.btn-danger {
+    background: #111111;
+    color: #ffffff;
+}
+
+.search-bar input,
+.filter-group select,
+.setting-item input,
+.setting-item select,
+.form-group input,
+.form-group select {
+    border-radius: 14px;
+    border-color: rgba(17, 17, 17, 0.14);
+}
+
+.modal-header,
+.modal-body {
+    background: #ffffff;
+}
+
+.close-btn {
+    color: var(--text-light);
+}
+
+.modal-actions {
+    border-top-color: var(--border-color);
+}
+
+.daily-chart {
+    padding-top: 1rem;
+}
+
+.ai-progress-card {
+    background: linear-gradient(180deg, #ffffff 0%, #faf8f3 100%);
+}
+
+.ai-progress-phase,
+.ai-progress-run-status,
+.ai-metric-item .label,
+.ai-milestone-item .meta .sub,
+.ai-run-item .sub,
+.activity-time,
+.history-title,
+.history-detail,
+.date {
+    color: var(--text-light);
+}
+
+.ai-milestone-item.done {
+    border-color: rgba(17, 17, 17, 0.12);
+}
+
+.ai-milestone-item.done .ai-milestone-status,
+.ai-run-item.completed .status {
+    color: #111111;
+}
+
+@media (max-width: 768px) {
+    .admin-topbar {
+        margin: 0.75rem 0.75rem 0;
+    }
+
+    .admin-content {
+        padding: 0.75rem;
+    }
+
+    .admin-sidebar {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 }
