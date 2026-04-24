@@ -268,7 +268,7 @@ async function navigateToLanding() {
 
     currentUser = null;
     clearSessionStorage();
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
 
 function scrollToTop() {
