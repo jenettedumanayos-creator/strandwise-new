@@ -1,3 +1,12 @@
+// Ensure flow starts from landing page
+(function() {
+    const fromLanding = sessionStorage.getItem('visitedFromLanding');
+    if (!fromLanding) {
+        // Redirect to index.html if not coming from landing page
+        window.location.href = 'index.html';
+    }
+})();
+
 const API_BASE = 'api';
 const DEFAULT_ADMIN_EMAIL = 'admin@gmail.com';
 
