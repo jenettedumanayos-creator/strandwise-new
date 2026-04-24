@@ -44,9 +44,9 @@ function trigger_auto_training_async($studentId): void
 {
     // Trigger model auto-training without blocking the response.
     // This function makes a non-blocking HTTP call to the auto_train endpoint.
-    
-    $autoTrainUrl = 'http://localhost/strandwise/api/admin/auto_train.php';
-    
+
+    $autoTrainUrl = 'http://localhost/strandwise-new/api/admin/auto_train.php';
+
     // Use curl for non-blocking async call (if available)
     if (function_exists('curl_init')) {
         $ch = curl_init();
@@ -57,7 +57,7 @@ function trigger_auto_training_async($studentId): void
         curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
         curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
         curl_setopt($ch, CURLOPT_HEADER, false);
-        
+
         // Ignore the response; just trigger the request
         @curl_exec($ch);
         curl_close($ch);
@@ -71,7 +71,7 @@ function trigger_auto_training_async($studentId): void
         ]);
         @file_get_contents($autoTrainUrl, false, $context);
     }
-    
+
     error_log("[AUTO-TRAIN] Auto-training triggered after student $studentId submitted assessment");
 }
 
@@ -126,7 +126,7 @@ function choose_unique_best(array $scores, array $candidates): ?string
     $isTie = false;
 
     foreach ($candidates as $code) {
-        $value = (float)($scores[$code] ?? 0.0);
+        $value = (float) ($scores[$code] ?? 0.0);
         if ($value > $bestValue) {
             $bestValue = $value;
             $best = $code;
@@ -165,15 +165,15 @@ function derive_tvl_subtracks(array $responses): array
     $tvlAnswerCount = 0;
 
     foreach ($responses as $item) {
-        $rating = isset($item['rating']) ? (int)$item['rating'] : 0;
+        $rating = isset($item['rating']) ? (int) $item['rating'] : 0;
         if ($rating !== 4) {
             continue;
         }
 
         $tvlAnswerCount += 1;
 
-        $questionText = strtolower(trim((string)($item['question_text'] ?? '')));
-        $responseText = strtolower(trim((string)($item['response_text'] ?? '')));
+        $questionText = strtolower(trim((string) ($item['question_text'] ?? '')));
+        $responseText = strtolower(trim((string) ($item['response_text'] ?? '')));
         $combined = $questionText . ' ' . $responseText;
 
         $matched = false;
@@ -294,14 +294,14 @@ function resolve_tie(array $weightedScores, array $partScores, array $tvlSubtrac
     }
 
     if ($pairKey === 'HUMSS|TVL') {
-        $tvlSignal = (float)($partScores['part3']['weighted']['TVL'] ?? 0)
-            + (float)($partScores['part4']['weighted']['TVL'] ?? 0)
-            + ((float)($tvlSubtracks['ICT']['score'] ?? 0) * 0.35)
-            + ((float)($tvlSubtracks['Cookery']['score'] ?? 0) * 0.35)
-            + ((float)($tvlSubtracks['Industrial']['score'] ?? 0) * 0.3);
+        $tvlSignal = (float) ($partScores['part3']['weighted']['TVL'] ?? 0)
+            + (float) ($partScores['part4']['weighted']['TVL'] ?? 0)
+            + ((float) ($tvlSubtracks['ICT']['score'] ?? 0) * 0.35)
+            + ((float) ($tvlSubtracks['Cookery']['score'] ?? 0) * 0.35)
+            + ((float) ($tvlSubtracks['Industrial']['score'] ?? 0) * 0.3);
 
-        $humssSignal = (float)($partScores['part3']['weighted']['HUMSS'] ?? 0)
-            + (float)($partScores['part4']['weighted']['HUMSS'] ?? 0);
+        $humssSignal = (float) ($partScores['part3']['weighted']['HUMSS'] ?? 0)
+            + (float) ($partScores['part4']['weighted']['HUMSS'] ?? 0);
 
         if ($tvlSignal > $humssSignal + 0.25) {
             $decisionPath[] = 'Special case HUMSS & TVL resolved in favor of TVL using practical/TVL sub-track signal.';
@@ -348,7 +348,7 @@ function resolve_tie(array $weightedScores, array $partScores, array $tvlSubtrac
 
     $part4Raw = $partScores['part4']['raw'];
     $part4Total = array_sum($part4Raw);
-    $tvlPart4Ratio = $part4Total > 0 ? ((float)$part4Raw['TVL'] / (float)$part4Total) : 0.0;
+    $tvlPart4Ratio = $part4Total > 0 ? ((float) $part4Raw['TVL'] / (float) $part4Total) : 0.0;
     if ($tvlPart4Ratio >= 0.5) {
         if (in_array('TVL', $tied, true)) {
             $decisionPath[] = 'Step 3: Part IV indicates strong livelihood pressure; TVL prioritized.';
@@ -408,7 +408,7 @@ try {
     $auth = require_role('student');
 
     $payload = read_json_body();
-    $assessmentId = (int)($payload['assessment_id'] ?? 1);
+    $assessmentId = (int) ($payload['assessment_id'] ?? 1);
     $responses = $payload['responses'] ?? [];
 
     if (!is_array($responses) || count($responses) === 0) {
@@ -441,7 +441,7 @@ try {
         ]);
     }
 
-    $studentId = (int)$student['student_id'];
+    $studentId = (int) $student['student_id'];
     $parts = rubric_parts();
     $strands = rubric_strands();
 
@@ -469,11 +469,11 @@ try {
     $insertResponse = $db->prepare('INSERT INTO survey_responses (student_id, question_id, rating, response_text) VALUES (?, ?, ?, ?)');
 
     foreach ($responses as $item) {
-        $questionNum = (int)($item['question_id'] ?? 0);
-        $questionText = trim((string)($item['question_text'] ?? ''));
-        $category = trim((string)($item['category'] ?? 'General'));
-        $rating = isset($item['rating']) ? (int)$item['rating'] : 0;
-        $responseText = isset($item['response_text']) ? trim((string)$item['response_text']) : null;
+        $questionNum = (int) ($item['question_id'] ?? 0);
+        $questionText = trim((string) ($item['question_text'] ?? ''));
+        $category = trim((string) ($item['category'] ?? 'General'));
+        $rating = isset($item['rating']) ? (int) $item['rating'] : 0;
+        $responseText = isset($item['response_text']) ? trim((string) $item['response_text']) : null;
 
         if ($questionNum <= 0 || $questionText === '' || $rating < 1 || $rating > 5) {
             throw new Exception('Each response must include valid question_id, question_text, and rating (1-5).');
@@ -485,7 +485,7 @@ try {
         }
 
         $partKey = resolve_part_key($questionNum);
-        $partWeight = (float)$parts[$partKey]['weight'];
+        $partWeight = (float) $parts[$partKey]['weight'];
 
         $rawScores[$strandCode] += 1;
         $weightedScores[$strandCode] += $partWeight;
@@ -497,7 +497,7 @@ try {
         $existingQuestion = $selectQuestion->get_result()->fetch_assoc();
 
         if ($existingQuestion) {
-            $dbQuestionId = (int)$existingQuestion['question_id'];
+            $dbQuestionId = (int) $existingQuestion['question_id'];
         } else {
             if ($category === '') {
                 $category = 'General';
@@ -507,7 +507,7 @@ try {
             if (!$insertQuestion->execute()) {
                 throw new Exception('Failed to insert question: ' . $db->error);
             }
-            $dbQuestionId = (int)$db->insert_id;
+            $dbQuestionId = (int) $db->insert_id;
         }
 
         $insertResponse->bind_param('iiis', $studentId, $dbQuestionId, $rating, $responseText);
@@ -524,7 +524,7 @@ try {
 
     $tieResolution = resolve_tie($weightedScores, $partScores, $tvlSubtracks);
     $selectedStrandCode = $tieResolution['selected'];
-    $selectedScore = (float)$weightedScores[$selectedStrandCode];
+    $selectedScore = (float) $weightedScores[$selectedStrandCode];
     $band = score_band($selectedScore);
 
     $maxWeightedScore = 54.0;
@@ -532,7 +532,7 @@ try {
 
     $insertResult = $db->prepare('INSERT INTO assessment_results (student_id, assessment_id, domain, score) VALUES (?, ?, ?, ?)');
     foreach ($weightedScores as $strandCode => $score) {
-        $scoreValue = round((float)$score, 2);
+        $scoreValue = round((float) $score, 2);
         $insertResult->bind_param('iisd', $studentId, $assessmentId, $strandCode, $scoreValue);
         $insertResult->execute();
     }
@@ -547,12 +547,12 @@ try {
     $stmt->close();
 
     if ($model) {
-        $modelId = (int)$model['model_id'];
+        $modelId = (int) $model['model_id'];
     } else {
         $stmt = $db->prepare('INSERT INTO ai_models (model_name, algorithm_type) VALUES (?, ?)');
         $stmt->bind_param('ss', $modelName, $algorithmType);
         $stmt->execute();
-        $modelId = (int)$db->insert_id;
+        $modelId = (int) $db->insert_id;
         $stmt->close();
     }
 
@@ -563,14 +563,14 @@ try {
     $stmt->close();
 
     if ($selectedStrand) {
-        $recommendedStrandId = (int)$selectedStrand['strand_id'];
+        $recommendedStrandId = (int) $selectedStrand['strand_id'];
     } else {
         $strandName = $strands[$selectedStrandCode]['name'] ?? $selectedStrandCode;
         $description = 'Auto-created strand profile from rubric model.';
         $stmt = $db->prepare('INSERT INTO strands (strand_code, strand_name, description) VALUES (?, ?, ?)');
         $stmt->bind_param('sss', $selectedStrandCode, $strandName, $description);
         $stmt->execute();
-        $recommendedStrandId = (int)$db->insert_id;
+        $recommendedStrandId = (int) $db->insert_id;
         $stmt->close();
     }
 
@@ -597,7 +597,7 @@ try {
     $stmt = $db->prepare('INSERT INTO recommendations (student_id, model_id, recommended_strand_id, confidence_score, external_factors_considered, final_decision_basis, explanation_text) VALUES (?, ?, ?, ?, FALSE, ?, ?)');
     $stmt->bind_param('iiidss', $studentId, $modelId, $recommendedStrandId, $confidence, $decisionBasis, $explanationText);
     $stmt->execute();
-    $recommendationId = (int)$db->insert_id;
+    $recommendationId = (int) $db->insert_id;
     $stmt->close();
 
     $db->commit();
@@ -634,6 +634,6 @@ try {
         'success' => false,
         'message' => 'Failed to save survey responses: ' . $e->getMessage(),
         'error' => $e->getMessage(),
-        'trace' => (defined('DEBUG') && (bool)constant('DEBUG')) ? $e->getTraceAsString() : null
+        'trace' => (defined('DEBUG') && (bool) constant('DEBUG')) ? $e->getTraceAsString() : null
     ]);
 }
