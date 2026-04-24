@@ -1,13 +1,55 @@
 const API_BASE = 'api';
 const DEFAULT_ADMIN_EMAIL = 'admin@gmail.com';
 
-// Hide carousel for monochrome redesign
-window.addEventListener('DOMContentLoaded', () => {
+// Initialize carousel
+function initAuthCarousel() {
     const carousel = document.querySelector('.auth-carousel');
-    if (carousel) {
-        carousel.style.display = 'none';
-    }
-});
+    if (!carousel) return;
+
+    const slides = carousel.querySelectorAll('.auth-carousel-slide');
+    if (slides.length < 2) return;
+
+    const images = [
+        'img/carousel/business1.jpg',
+        'img/carousel/business2.jpg',
+        'img/carousel/cooking.jpg',
+        'img/carousel/ict1.jpg',
+        'img/carousel/ict2.jpg',
+        'img/carousel/lab.jpg',
+        'img/carousel/school.jpg',
+        'img/carousel/stem1.jpg',
+        'img/carousel/stem2.jpg',
+        'img/carousel/stem3.jpg'
+    ];
+
+    let activeSlideIndex = 0;
+    let imageIndex = 0;
+
+    // Set initial images
+    slides.forEach((slide, idx) => {
+        slide.style.backgroundImage = `url('${images[idx % images.length]}')`;
+        slide.classList.toggle('is-active', idx === 0);
+    });
+
+    imageIndex = slides.length % images.length;
+
+    // Rotate carousel every 5 seconds
+    setInterval(() => {
+        const nextSlideIndex = (activeSlideIndex + 1) % slides.length;
+        const outgoingSlide = slides[activeSlideIndex];
+        const incomingSlide = slides[nextSlideIndex];
+
+        incomingSlide.style.backgroundImage = `url('${images[imageIndex]}')`;
+        imageIndex = (imageIndex + 1) % images.length;
+
+        outgoingSlide.classList.remove('is-active');
+        incomingSlide.classList.add('is-active');
+
+        activeSlideIndex = nextSlideIndex;
+    }, 5000);
+}
+
+window.addEventListener('DOMContentLoaded', initAuthCarousel);
 
 function uiToast(message, type = 'info') {
     if (window.AppUI?.toast) {
