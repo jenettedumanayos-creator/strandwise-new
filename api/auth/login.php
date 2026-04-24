@@ -16,8 +16,9 @@ if ($email === '' || $password === '') {
     ]);
 }
 
-$db = get_db_connection();
 try {
+    $db = get_db_connection();
+
     if ($roleHint === 'admin') {
         $defaultAdminEmail = strtolower((string) (defined('DEFAULT_ADMIN_EMAIL') ? DEFAULT_ADMIN_EMAIL : 'admin@gmail.com'));
         if ($email === $defaultAdminEmail) {
@@ -45,7 +46,7 @@ try {
         }
 
         $adminId = (int) $admin['admin_id'];
-        $ipAddress = substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
+        error_log('Login request failed: ' . $throwable->getMessage());
         $stmt = $db->prepare('UPDATE admins SET last_login = CURRENT_TIMESTAMP, last_ip = ?, updated_at = CURRENT_TIMESTAMP WHERE admin_id = ?');
         $stmt->bind_param('si', $ipAddress, $adminId);
         $stmt->execute();

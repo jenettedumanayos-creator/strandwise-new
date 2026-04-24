@@ -55,6 +55,7 @@ html, body {
     position: absolute;
     inset: 0;
     z-index: 0;
+    display: none !important;
 }
 
 .auth-carousel-slide {
@@ -69,7 +70,7 @@ html, body {
 }
 
 .auth-carousel-slide.is-active {
-    opacity: 1;
+    opacity: 0 !important;
     transform: scale(1.06);
 }
 
@@ -81,8 +82,8 @@ html, body {
     height: 100%;
     z-index: 1;
     background: 
-        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%25" style="stop-color:rgba(107,99,255,0.1);stop-opacity:1" /><stop offset="100%25" style="stop-color:rgba(157,139,255,0.05);stop-opacity:1" /></linearGradient></defs><rect width="1200" height="800" fill="url(%23grad)"/><circle cx="100" cy="50" r="150" fill="rgba(107,99,255,0.05)" /><circle cx="1100" cy="750" r="200" fill="rgba(157,139,255,0.05)" /><path d="M 0 400 Q 300 200 600 300 T 1200 400" stroke="rgba(157,139,255,0.1)" stroke-width="2" fill="none" /></svg>'),
-        linear-gradient(135deg, rgba(45, 27, 105, 0.78) 0%, rgba(30, 10, 71, 0.82) 60%, rgba(15, 23, 42, 0.9) 100%);
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%25" style="stop-color:rgba(255,255,255,0.03);stop-opacity:1" /><stop offset="100%25" style="stop-color:rgba(255,255,255,0.01);stop-opacity:1" /></linearGradient></defs><rect width="1200" height="800" fill="url(%23grad)"/><circle cx="100" cy="50" r="150" fill="rgba(255,255,255,0.02)" /><circle cx="1100" cy="750" r="200" fill="rgba(255,255,255,0.02)" /><path d="M 0 400 Q 300 200 600 300 T 1200 400" stroke="rgba(255,255,255,0.03)" stroke-width="2" fill="none" /></svg>'),
+        linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.5) 100%);
     pointer-events: none;
 }
 

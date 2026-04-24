@@ -1,6 +1,14 @@
 const API_BASE = 'api';
 const DEFAULT_ADMIN_EMAIL = 'admin@gmail.com';
 
+// Hide carousel for monochrome redesign
+window.addEventListener('DOMContentLoaded', () => {
+    const carousel = document.querySelector('.auth-carousel');
+    if (carousel) {
+        carousel.style.display = 'none';
+    }
+});
+
 function uiToast(message, type = 'info') {
     if (window.AppUI?.toast) {
         window.AppUI.toast(message, type);
