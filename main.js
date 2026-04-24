@@ -2,7 +2,6 @@ const API_BASE = 'api';
 let currentUser = null;
 let latestResultsData = null;
 let assessmentWizardInitialized = false;
-let autoAdvanceTimer = null;
 
 function uiAlert(message, title = 'Notice') {
     if (window.AppUI?.alert) {
@@ -510,16 +509,6 @@ function initAssessmentWizard() {
                 }
 
                 updateButtonState();
-
-                if (autoAdvanceTimer) {
-                    window.clearTimeout(autoAdvanceTimer);
-                }
-
-                if (index < lastIndex) {
-                    autoAdvanceTimer = window.setTimeout(() => {
-                        showQuestion(index + 1);
-                    }, 400);
-                }
             });
         });
     });
@@ -766,7 +755,7 @@ async function fetchAndDisplayResults() {
             'Practical': {
                 icon: '🛠️',
                 title: 'Technical/Vocational Strand',
-                desc: 'Technical & Practical Skills',
+                desc: 'Technical & Practical Skills',   
                 career: 'Ideal for technicians, trades professionals, and applied specialists.'
             },
             'General': {

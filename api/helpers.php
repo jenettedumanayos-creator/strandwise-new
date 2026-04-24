@@ -2,9 +2,22 @@
 
 function json_response(int $statusCode, array $payload): void
 {
+    // Ensure no buffered output corrupts JSON responses consumed by fetch().
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+
+    $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    if ($json === false) {
+        http_response_code(500);
+        echo '{"success":false,"message":"Failed to encode JSON response"}';
+        exit;
+    }
+
+    echo $json;
     exit;
 }
 
