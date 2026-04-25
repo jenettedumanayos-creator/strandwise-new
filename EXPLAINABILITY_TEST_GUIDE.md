@@ -89,12 +89,12 @@ Next student gets results from latest trained model
 ### Phase 2: Basic System Health
 ```bash
 # Verify API health check
-curl http://localhost/strandwise/api/health.php
+curl http://localhost/strandwise-new/api/health.php
 # Expected: {"success":true,"message":"API is healthy","data":{"db":"connected"}}
 ```
 
 ### Phase 3: Student Registration & Authentication
-1. Open `http://localhost/strandwise/login.html` in browser
+1. Open `http://localhost/strandwise-new/login.html` in browser
 2. Click "Register" to create a test student account:
    - **Email:** `student.test@example.com`
    - **Password:** `TestPass123`
@@ -218,10 +218,10 @@ curl http://localhost/strandwise/api/health.php
 2. **Manually test API endpoints:**
    ```bash
    # Fetch latest explanation (must be logged in; uses session cookies)
-   curl -b "cookies.txt" http://localhost/strandwise/api/student/explain_recommendation.php
+   curl -b "cookies.txt" http://localhost/strandwise-new/api/student/explain_recommendation.php
    
    # Fetch admin decision paths (must be logged in as admin)
-   curl -b "cookies.txt" http://localhost/strandwise/api/admin/decision_paths.php?limit=5&strand=STEM
+   curl -b "cookies.txt" http://localhost/strandwise-new/api/admin/decision_paths.php?limit=5&strand=STEM
    ```
 
 3. **Test pagination:**
@@ -293,7 +293,7 @@ curl http://localhost/strandwise/api/health.php
 ### Issue: "No detailed explanation available" console warning
 **Solution:** Verify explain_recommendation.php API response:
 ```bash
-curl -b "cookies.txt" -i http://localhost/strandwise/api/student/explain_recommendation.php
+curl -b "cookies.txt" -i http://localhost/strandwise-new/api/student/explain_recommendation.php
 ```
 Expected: 200 OK with JSON data structure.
 
@@ -301,7 +301,7 @@ Expected: 200 OK with JSON data structure.
 **Solution:** 
 - Verify at least one student has submitted assessment
 - Check browser console for fetch errors
-- Run: `curl http://localhost/strandwise/api/admin/decision_paths.php` (may need auth)
+- Run: `curl http://localhost/strandwise-new/api/admin/decision_paths.php` (may need auth)
 
 ### Issue: TVL subtracks don't show
 **Solution:**
