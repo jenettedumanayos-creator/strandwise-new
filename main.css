@@ -528,14 +528,14 @@ body {
 
 /* Header with toggle and user options */
 .content-header {
-    display: none;
-    justify-content: space-between;
+    display: flex;
+    justify-content: flex-end;
     align-items: center;
     margin-bottom: 2rem;
-    background: white;
-    padding: 1.5rem 2rem;
+    background: transparent;
+    padding: 0;
     border-radius: 12px;
-    box-shadow: var(--shadow);
+    box-shadow: none;
     min-height: 0;
 }
 
@@ -560,6 +560,8 @@ body {
     gap: 1rem;
     align-items: center;
     flex-shrink: 0;
+    position: relative;
+    z-index: 10;
 }
 
 .user-avatar {
@@ -576,8 +578,8 @@ body {
 }
 
 .logout-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--primary);
+    border: 1px solid var(--primary);
     padding: 0.6rem 1.2rem;
     border-radius: 8px;
     cursor: pointer;
@@ -588,9 +590,10 @@ body {
 }
 
 .logout-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
     transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 /* Welcome Section */
