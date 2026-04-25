@@ -550,7 +550,7 @@ body {
 .welcome-section .user-menu {
     position: absolute;
     top: 2rem;
-    left: 2rem;
+    right: 2rem;
     display: flex;
     gap: 1rem;
     align-items: center;
