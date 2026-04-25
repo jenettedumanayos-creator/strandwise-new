@@ -528,7 +528,7 @@ body {
 
 /* Header with toggle and user options */
 .content-header {
-    display: flex;
+    display: none;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
@@ -536,6 +536,7 @@ body {
     padding: 1.5rem 2rem;
     border-radius: 12px;
     box-shadow: var(--shadow);
+    min-height: 0;
 }
 
 .header-toggle {
@@ -548,6 +549,7 @@ body {
 }
 
 .header-title {
+    display: none;
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--text-dark);
@@ -557,11 +559,12 @@ body {
     display: flex;
     gap: 1rem;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
@@ -569,25 +572,24 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .logout-btn {
-    background: white;
-    border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.6rem 1.2rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 500;
-    color: var(--text-dark);
+    color: white;
     font-size: 0.9rem;
 }
 
 .logout-btn:hover {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
 }
 
@@ -619,6 +621,25 @@ body {
     position: relative;
     z-index: 2;
     margin-bottom: 2rem;
+}
+
+.welcome-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 3rem;
+}
+
+.welcome-header-left {
+    flex: 1;
+}
+
+.welcome-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    flex-shrink: 0;
 }
 
 .welcome-header h2 {
@@ -692,14 +713,10 @@ body {
 
 /* Overall Progress */
 .overall-progress {
-    position: absolute;
-    right: 3rem;
-    top: 50%;
-    transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     z-index: 2;
 }
 
@@ -1529,11 +1546,23 @@ body {
     .overall-progress {
         position: static;
         transform: none;
-        margin-top: 2rem;
+        margin-top: 0;
     }
 
     .welcome-section {
         padding: 2rem;
+    }
+
+    .welcome-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .welcome-header-right {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
     }
 
     .results-container.dynamic-results .interactive-card.is-top-match {

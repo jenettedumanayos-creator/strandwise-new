@@ -78,11 +78,6 @@
         <div class="main-content">
             <!-- Header -->
             <div class="content-header">
-                <h1 class="header-title" id="sectionTitle">Welcome Home</h1>
-                <div class="user-menu">
-                    <div class="user-avatar">JD</div>
-                    <button class="logout-btn" onclick="navigateToLanding()">Logout</button>
-                </div>
             </div>
 
             <!-- Home Section -->
@@ -90,8 +85,24 @@
                 <!-- Welcome Section with Progress -->
                 <div class="welcome-section">
                     <div class="welcome-header">
-                        <h2>Welcome back, Student! 👋</h2>
-                        <p>Continue your journey to discover your ideal academic strand.</p>
+                        <div class="welcome-header-content">
+                            <div class="welcome-header-left">
+                                <h2>Welcome back, Student! 👋</h2>
+                                <p>Continue your journey to discover your ideal academic strand.</p>
+                            </div>
+                            <div class="welcome-header-right">
+                                <div class="user-menu">
+                                    <div class="user-avatar">JD</div>
+                                    <button class="logout-btn" onclick="navigateToLanding()">Logout</button>
+                                </div>
+                                <div class="overall-progress">
+                                    <div class="progress-circle">
+                                        <div class="progress-percentage">100%</div>
+                                    </div>
+                                    <div class="progress-label">Progress</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="progress-steps">
@@ -113,12 +124,6 @@
                         </div>
                     </div>
 
-                    <div class="overall-progress">
-                        <div class="progress-circle">
-                            <div class="progress-percentage">25%</div>
-                        </div>
-                        <div class="progress-label">Progress</div>
-                    </div>
                 </div>
 
                 <!-- Dashboard Stats Cards -->
@@ -152,14 +157,17 @@
                     style="background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 4rem;">
                     <h2 style="margin-bottom: 1rem; color: var(--text-dark);">Welcome to StrandWise! 👋</h2>
                     <p style="color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.8;" id="welcomeMessage">
-                        Hello! Welcome to your personal strand recommendation dashboard. This is your space to discover
+                        Hello! Welcome to your personal strand recommendation dashboard. This is your space to
+                        discover
                         which academic strand aligns best with your interests, strengths, and career goals.
                     </p>
                     <p style="color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.8;">
-                        Start by taking our assessment to get personalized recommendations. Our intelligent system will
+                        Start by taking our assessment to get personalized recommendations. Our intelligent
+                        system will
                         analyze your answers and suggest the most suitable strands for you.
                     </p>
-                    <button class="btn-primary" onclick="scrollToSection('assessment-section')">Start Your Assessment
+                    <button class="btn-primary" onclick="scrollToSection('assessment-section')">Start Your
+                        Assessment
                         →</button>
                 </div>
 
@@ -167,7 +175,8 @@
                 <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow);">
                     <h3 style="margin-bottom: 1rem; color: var(--text-dark);">Quick Tips 💡</h3>
                     <ul style="color: var(--text-light); line-height: 2;">
-                        <li>✓ Take your time with the assessment - the more honest your answers, the better your results
+                        <li>✓ Take your time with the assessment - the more honest your answers, the better your
+                            results
                         </li>
                         <li>✓ Explore each strand to learn about career opportunities and subject offerings</li>
                         <li>✓ Don't hesitate to reach out if you have questions - we're here to help!</li>
