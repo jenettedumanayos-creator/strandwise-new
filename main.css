@@ -528,15 +528,7 @@ body {
 
 /* Header with toggle and user options */
 .content-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-bottom: 2rem;
-    background: transparent;
-    padding: 0;
-    border-radius: 12px;
-    box-shadow: none;
-    min-height: 0;
+    display: none;
 }
 
 .header-toggle {
@@ -555,12 +547,14 @@ body {
     color: var(--text-dark);
 }
 
-.user-menu {
+.welcome-section .user-menu {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
     display: flex;
     gap: 1rem;
     align-items: center;
     flex-shrink: 0;
-    position: relative;
     z-index: 10;
 }
 
@@ -598,6 +592,7 @@ body {
 
 /* Welcome Section */
 .welcome-section {
+    position: relative;
     background: linear-gradient(135deg, #1f1f1f 0%, #4a4a4a 100%);
     color: white;
     padding: 3rem;
