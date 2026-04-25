@@ -73,12 +73,7 @@ function interpret_part_score($part_key, $strand_scores, $max_part_weight) {
         'label' => $part_interpretation['label'],
         'description' => $part_interpretation['description'],
         'top_strand_matches' => $top_strands,
-        'explanation' => implode(' ', array_column(
-            array_slice($strand_scores, 0, 1),
-            function($score, $strand) use ($part_interpretation) {
-                return $part_interpretation['strands_match'][$strand] ?? '';
-            }
-        ))
+        'explanation' => $top_strands[0]['interpretation'] ?? 'No specific interpretation available.'
     ];
 }
 
@@ -96,6 +91,65 @@ function strength_interpretation($band_info) {
         'interpretation' => $interpretations[$strength] ?? 'Assessment pending.',
         'score_range' => $band_info['range']
     ];
+}
+
+function summarize_top_factors(array $part_explanations, array $score_ranking): array
+{
+    $topPart = $part_explanations[0] ?? null;
+    $topStrand = $score_ranking[0] ?? null;
+    $runnerUp = $score_ranking[1] ?? null;
+
+    $factors = [];
+    if ($topPart && !empty($topPart['label'])) {
+        $factors[] = sprintf('Strongest influence: %s.', $topPart['label']);
+    }
+
+    if ($topStrand && !empty($topStrand['strand'])) {
+        $factors[] = sprintf('%s is the highest-scoring strand at %s points (%s%%).', $topStrand['strand'], $topStrand['score'], $topStrand['percent']);
+    }
+
+    if ($runnerUp && !empty($runnerUp['strand']) && !empty($topStrand['strand'])) {
+        $gap = round((float)$topStrand['score'] - (float)$runnerUp['score'], 2);
+        $factors[] = sprintf('It leads the next option (%s) by %s points.', $runnerUp['strand'], $gap);
+    }
+
+    return $factors;
+}
+
+function build_recommendation_reasons(array $part_explanations, array $score_ranking, array $strength): array
+{
+    $reasons = [];
+
+    if (!empty($part_explanations[0]['label'])) {
+        $reasons[] = sprintf("Your strongest match comes from %s, which aligns with the AI model's top signal.", $part_explanations[0]['label']);
+    }
+
+    if (!empty($score_ranking[0]['strand'])) {
+        $reasons[] = sprintf('%s is currently the highest-scoring strand at %s points (%s%%).', $score_ranking[0]['strand'], $score_ranking[0]['score'], $score_ranking[0]['percent']);
+    }
+
+    if (!empty($strength['strength_level'])) {
+        $reasons[] = sprintf('The assessment strength is %s, which supports the recommendation confidence.', $strength['strength_level']);
+    }
+
+    return array_slice($reasons, 0, 3);
+}
+
+function build_improvement_suggestions(array $score_ranking, array $decision_path): array
+{
+    $suggestions = [];
+
+    if (count($score_ranking) >= 2) {
+        $suggestions[] = sprintf('Compare %s with %s before finalizing your choice.', $score_ranking[0]['strand'], $score_ranking[1]['strand']);
+    }
+
+    if (!empty($decision_path)) {
+        $suggestions[] = 'Review the decision path with a counselor or adviser to discuss the AI factors in detail.';
+    } else {
+        $suggestions[] = 'Use the explanation summary to understand which profile areas most influenced the result.';
+    }
+
+    return array_slice($suggestions, 0, 2);
 }
 
 try {
@@ -196,6 +250,15 @@ try {
         ];
     }
 
+    $summary = summarize_top_factors($part_explanations, $score_ranking);
+    $reasons = build_recommendation_reasons($part_explanations, $score_ranking, $strength);
+    $suggestions = build_improvement_suggestions($score_ranking, $decision_path);
+
+    $primaryPart = $part_explanations[0] ?? null;
+    $primaryStrength = $strength['strength_level'] ?? 'Assessment pending';
+    $primaryStrand = $score_ranking[0]['strand'] ?? ($recommendation['strand_code'] ?? 'N/A');
+    $secondaryStrand = $score_ranking[1]['strand'] ?? null;
+
     json_response(200, [
         'success' => true,
         'message' => 'Detailed explanation generated',
@@ -211,6 +274,17 @@ try {
                 ]
             ],
             'strength_assessment' => $strength,
+            'summary' => [
+                'headline' => sprintf('%s is the recommended strand because the AI model detected the strongest overall alignment in your profile.', $recommendation['strand_name']),
+                'primary_strand' => $primaryStrand,
+                'secondary_strand' => $secondaryStrand,
+                'primary_part' => $primaryPart['label'] ?? null,
+                'strength_level' => $primaryStrength,
+                'key_factors' => $summary,
+                'reasons' => $reasons,
+                'suggestions' => $suggestions,
+                'confidence_note' => sprintf('The model recorded a confidence of %s for this recommendation.', round((float)$recommendation['confidence_score'], 2) . '%')
+            ],
             'part_analysis' => $part_explanations,
             'score_ranking' => $score_ranking,
             'tvl_subtracks' => $tvl_details,

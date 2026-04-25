@@ -17,6 +17,23 @@ function score_band(float $score): array
     return ['range' => 'Below 10', 'strength_level' => 'Poor Match'];
 }
 
+function strength_interpretation(array $band): array
+{
+    $strength = (string)($band['strength_level'] ?? 'Unknown');
+    $interpretations = [
+        'Strong Match' => 'This strand is highly aligned with your profile. You show clear and consistent indicators across multiple dimensions.',
+        'Moderate Match' => 'This strand is a good fit with your profile. There are positive indicators, though some areas show mixed signals.',
+        'Weak Match' => 'This strand is possible but not ideal. You may succeed, but consider exploring other options in counseling.',
+        'Poor Match' => 'This strand does not align well with your profile. Stronger alternatives are recommended.'
+    ];
+
+    return [
+        'strength_level' => $strength,
+        'interpretation' => $interpretations[$strength] ?? 'Assessment pending.',
+        'score_range' => (string)($band['range'] ?? '0-54')
+    ];
+}
+
 try {
     $auth = require_role('student');
     $db = get_db_connection();
@@ -125,10 +142,12 @@ try {
     $decisionPath = [];
     $requiresCounselorOverride = false;
     $tvlSubtracks = [];
+    $recommendationSummary = null;
 
     if ($latestRecommendation && !empty($latestRecommendation['explanation_text'])) {
         $parsed = json_decode((string)$latestRecommendation['explanation_text'], true);
         if (is_array($parsed)) {
+            $recommendationSummary = is_array($parsed['summary'] ?? null) ? $parsed['summary'] : null;
             $tie = $parsed['tie_resolution'] ?? [];
             if (is_array($tie)) {
                 $decisionPath = $tie['decision_path'] ?? [];
@@ -145,6 +164,7 @@ try {
     }
 
     $band = score_band($topScore);
+    $strengthAssessment = strength_interpretation($band);
     $maxWeightedScore = 54;
     $confidencePercent = $latestRecommendation
         ? (float)$latestRecommendation['confidence_score']
@@ -170,10 +190,12 @@ try {
                 'model_name' => $latestRecommendation['model_name'],
                 'algorithm_type' => $latestRecommendation['algorithm_type']
             ] : null,
+            'recommendation_summary' => $recommendationSummary,
             'decision_path' => $decisionPath,
             'requires_counselor_override' => $requiresCounselorOverride,
             'tvl_subtracks' => $tvlSubtracks,
             'score_band' => $band,
+            'strength_assessment' => $strengthAssessment,
             'max_weighted_score' => $maxWeightedScore
         ]
     ]);

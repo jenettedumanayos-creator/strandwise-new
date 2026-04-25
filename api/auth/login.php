@@ -46,7 +46,7 @@ try {
         }
 
         $adminId = (int) $admin['admin_id'];
-        $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+        $ipAddress = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
         $stmt = $db->prepare('UPDATE admins SET last_login = CURRENT_TIMESTAMP, last_ip = ?, updated_at = CURRENT_TIMESTAMP WHERE admin_id = ?');
         $stmt->bind_param('si', $ipAddress, $adminId);
         $stmt->execute();
@@ -144,3 +144,4 @@ try {
         'message' => 'Unable to process login at the moment'
     ]);
 }
+

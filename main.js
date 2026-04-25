@@ -547,17 +547,22 @@ function renderPartAnalysis(part_analysis) {
     html += '<h4 style="margin-bottom: 1.5rem; color: var(--primary);">How We Analyzed Your Profile</h4>';
 
     part_analysis.forEach((part, idx) => {
+        const maxPartScore = Math.max(...(part.top_strand_matches || []).map(m => parseFloat(m.score) || 0), 1);
+        const partColors = ['#3B82F6', '#8B5CF6', '#EC4899'];
+        
         html += `
-        <div class="part-analysis" style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid var(--primary);">
+        <div class="part-analysis" style="background: var(--bg-light); padding: 1.2rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid var(--primary);">
             <h5 style="color: var(--primary); margin-bottom: 0.5rem;">${part.label}</h5>
-            <p style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 0.75rem;">${part.description}</p>
-            <div class="top-strand-matches">
-                ${part.top_strand_matches.map((match, i) => `
-                    <div style="background: white; padding: 0.5rem 0.75rem; border-radius: 0.3rem; margin-bottom: 0.5rem;">
-                        <strong style="color: var(--primary);">${match.strand}</strong> (${match.score} pts)
-                        <br><span style="font-size: 0.9rem; color: var(--text-light);">${match.interpretation}</span>
-                    </div>
-                `).join('')}
+            <p style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 1rem;">${part.description}</p>
+            <div class="top-strand-matches" style="background: white; padding: 1rem; border-radius: 0.4rem;">
+                ${(part.top_strand_matches || []).map((match, i) => {
+                    const barPercent = (parseFloat(match.score) / maxPartScore) * 100;
+                    const color = partColors[i % partColors.length];
+                    const pctDisplay = barPercent > 25 ? '<span style="color: white; font-size: 0.75rem; font-weight: 600;">' + Math.round(barPercent) + '%</span>' : '';
+                    const marginStyle = i === (part.top_strand_matches.length - 1) ? '0' : '1rem';
+                    const justifyStyle = barPercent > 35 ? 'flex-end' : 'flex-start';
+                    return '<div style="margin-bottom: ' + marginStyle + ';"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;"><strong style="color: var(--primary);">' + match.strand + '</strong><span style="font-size: 0.85rem; color: #666;">' + match.score + ' pts</span></div><div style="background: #f0f0f0; height: 18px; border-radius: 3px; overflow: hidden;"><div style="background: ' + color + '; height: 100%; width: ' + barPercent + '%; transition: width 0.5s ease; display: flex; align-items: center; justify-content: ' + justifyStyle + '; padding: 0 0.4rem;">' + pctDisplay + '</div></div><p style="font-size: 0.85rem; color: var(--text-light); margin: 0.3rem 0 0;">' + match.interpretation + '</p></div>';
+                }).join('')}
             </div>
         </div>
         `;
@@ -572,23 +577,82 @@ function renderScoreRanking(score_ranking) {
         return '';
     }
 
+    const maxScore = Math.max(...score_ranking.map(item => parseFloat(item.score) || 0));
+    const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'];
+    
     let html = '<div class="score-ranking" style="margin-top: 2rem;">';
     html += '<h4 style="margin-bottom: 1.5rem; color: var(--primary);">Your Strand Match Ranking</h4>';
+    html += '<div style="background: white; padding: 1.5rem; border-radius: 0.5rem;">';
 
     score_ranking.forEach((item, idx) => {
-        const medalSymbol = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '→';
+        const percentage = parseFloat(item.percent) || 0;
+        const barLength = (parseFloat(item.score) / maxScore) * 100;
+        const color = colors[idx % colors.length];
+        const medalSymbol = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '';
+        
         html += `
-        <div class="rank-item" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; background: white; padding: 0.75rem; border-radius: 0.5rem; border-left: 3px solid ${idx === 0 ? 'var(--primary)' : '#ddd'};">
-            <span style="font-size: 1.5rem; min-width: 2rem; text-align: center;">${medalSymbol}</span>
-            <div style="flex: 1;">
-                <strong>${item.strand}</strong>
-                <div style="font-size: 0.9rem; color: var(--text-light);">
-                    ${item.score} pts (${item.percent}%)
+        <div style="margin-bottom: 1.5rem; ${idx === score_ranking.length - 1 ? 'margin-bottom: 0;' : ''}">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex: 0.3;">
+                    <span style="font-size: 1.3rem; min-width: 1.8rem; text-align: center;">${medalSymbol}</span>
+                    <strong style="color: var(--text-dark);">${item.strand}</strong>
+                </div>
+                <span style="color: #666; font-size: 0.9rem; text-align: right;">${item.score} pts • ${percentage}%</span>
+            </div>
+            <div style="background: #f0f0f0; height: 24px; border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="background: linear-gradient(90deg, ${color}, ${adjustBrightness(color, 20)}); height: 100%; width: ${barLength}%; transition: width 0.5s ease; display: flex; align-items: center; justify-content: ${barLength > 40 ? 'flex-end' : 'flex-start'}; padding: 0 0.5rem;">
+                    ${barLength > 30 ? `<span style="color: white; font-size: 0.8rem; font-weight: 600;">${Math.round(barLength)}%</span>` : ''}
                 </div>
             </div>
         </div>
         `;
     });
+
+    html += '</div></div>';
+    return html;
+}
+
+function adjustBrightness(color, percent) {
+    const num = parseInt(color.replace("#", ""), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.min(255, (num >> 16) + amt);
+    const G = Math.min(255, (num >> 8 & 0x00FF) + amt);
+    const B = Math.min(255, (num & 0x0000FF) + amt);
+    return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+}
+
+function renderExplanationSummary(summary) {
+    if (!summary) {
+        return '';
+    }
+
+    const keyFactors = Array.isArray(summary.key_factors) ? summary.key_factors : [];
+    let html = '<div class="explanation-summary" style="margin-top: 1.5rem; padding: 1rem; background: white; border-radius: 0.5rem; border-left: 4px solid var(--accent);">';
+    html += '<h4 style="color: var(--accent); margin-bottom: 0.75rem;">AI Explanation Summary</h4>';
+    html += `<p style="color: var(--text-light); margin-bottom: 0.75rem;">${summary.headline || 'This recommendation was generated by the AI model.'}</p>`;
+
+    if (summary.confidence_note) {
+        html += `<p style="font-size: 0.95rem; color: #666; margin-bottom: 0.75rem;">${summary.confidence_note}</p>`;
+    }
+
+    if (keyFactors.length > 0) {
+        html += '<ul style="margin: 0; padding-left: 1.2rem; color: var(--text-light);">';
+        keyFactors.forEach(factor => {
+            html += `<li style="margin-bottom: 0.35rem;">${factor}</li>`;
+        });
+        html += '</ul>';
+    }
+
+    if (summary.primary_strand || summary.secondary_strand) {
+        html += '<div style="margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">';
+        if (summary.primary_strand) {
+            html += `<span style="display: inline-block; padding: 0.35rem 0.65rem; background: #f3f6ff; border-radius: 999px; font-size: 0.9rem;"><strong>Top Strand:</strong> ${summary.primary_strand}</span>`;
+        }
+        if (summary.secondary_strand) {
+            html += `<span style="display: inline-block; padding: 0.35rem 0.65rem; background: #f9f4ff; border-radius: 999px; font-size: 0.9rem;"><strong>Runner-up:</strong> ${summary.secondary_strand}</span>`;
+        }
+        html += '</div>';
+    }
 
     html += '</div>';
     return html;
@@ -603,16 +667,27 @@ function renderTvlSubtracks(tvl_subtracks) {
     html += '<h4 style="margin-bottom: 1.5rem; color: var(--primary);">TVL Sub-Track Breakdown</h4>';
 
     const subtracks = ['ict', 'cookery', 'industrial'];
+        const colors = ['#6366F1', '#F97316', '#DC2626'];
+    
     subtracks.forEach(key => {
         if (tvl_subtracks[key]) {
             const track = tvl_subtracks[key];
+            const colorIndex = ['ict', 'cookery', 'industrial'].indexOf(key);
+            const color = colors[colorIndex];
+            const percent = track.percent || 0;
+            
             html += `
-            <div style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-                <h5 style="color: var(--primary); margin-bottom: 0.5rem;">${track.name}</h5>
-                <div class="progress-bar" style="margin-bottom: 0.5rem;">
-                    <div class="progress-fill" style="width: ${(track.percent || 0)}%;"></div>
+            <div style="background: white; padding: 1.2rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid ${color};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                    <h5 style="color: ${color}; margin: 0; font-size: 1rem;">${track.name}</h5>
+                    <span style="font-weight: 700; color: ${color}; font-size: 1.1rem;">${percent}%</span>
                 </div>
-                <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.5rem;">${track.percent}% - ${track.careers}</p>
+                <div style="background: #f0f0f0; height: 28px; border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 0.8rem;">
+                    <div style="background: linear-gradient(90deg, ${color}, ${adjustBrightness(color, 15)}); height: 100%; width: ${percent}%; transition: width 0.5s ease; display: flex; align-items: center; justify-content: ${percent > 40 ? 'flex-end' : 'flex-start'}; padding: 0 0.6rem;">
+                        ${percent > 25 ? `<span style="color: white; font-size: 0.85rem; font-weight: 600;">${Math.round(percent)}%</span>` : ''}
+                    </div>
+                </div>
+                <p style="color: var(--text-light); font-size: 0.9rem; margin: 0;">${track.careers}</p>
             </div>
             `;
         }
@@ -661,14 +736,40 @@ async function displayDetailedExplanation() {
 
     if (explanation.strength_assessment) {
         const strength = explanation.strength_assessment;
+        const levelMap = {
+            'Strong Match': { fill: '#10B981', percent: 90 },
+            'Moderate Match': { fill: '#F59E0B', percent: 60 },
+            'Weak Match': { fill: '#EF4444', percent: 40 },
+            'Poor Match': { fill: '#DC2626', percent: 20 }
+        };
+        
+        const level = strength.strength_level || 'Unknown';
+        const config = levelMap[level] || levelMap['Moderate Match'];
+        const circumference = 2 * Math.PI * 45;
+        const offset = circumference - (config.percent / 100) * circumference;
+        
         explainerHtml += `
-        <div class="strength-box" style="background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
-            <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Assessment Strength: ${strength.strength_level}</h4>
-            <p style="color: var(--text-light); margin-bottom: 0.5rem;">${strength.interpretation}</p>
-            <p style="font-size: 0.9rem; color: #666; margin: 0;">Score Range: ${strength.score_range}</p>
+        <div class="strength-box" style="background: white; padding: 1.2rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+            <h4 style="color: var(--primary); margin-bottom: 0.8rem;">Assessment Strength</h4>
+            <div style="display: flex; align-items: center; gap: 1.2rem;">
+                <svg width="100" height="100" style="overflow: visible; flex-shrink: 0;">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="10"/>
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="${config.fill}" stroke-width="10" 
+                            stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+                            stroke-linecap="round" style="transform: rotate(-90deg); transform-origin: 50px 50px; transition: stroke-dashoffset 0.3s;"/>
+                    <text x="50" y="57" text-anchor="middle" font-size="20" font-weight="bold" fill="${config.fill}">${config.percent}%</text>
+                </svg>
+                <div>
+                    <p style="color: ${config.fill}; font-weight: 700; font-size: 1.1rem; margin: 0 0 0.3rem;">${strength.strength_level}</p>
+                    <p style="color: var(--text-light); margin: 0 0 0.5rem; line-height: 1.4;">${strength.interpretation}</p>
+                    <p style="font-size: 0.9rem; color: #666; margin: 0;">Score Range: ${strength.score_range}</p>
+                </div>
+            </div>
         </div>
         `;
     }
+
+    explainerHtml += renderExplanationSummary(explanation.summary);
 
     explainerHtml += renderPartAnalysis(explanation.part_analysis);
     explainerHtml += renderScoreRanking(explanation.score_ranking);
@@ -802,6 +903,10 @@ async function fetchAndDisplayResults() {
         const chartColors = ['#F4DF4E', '#10C57A', '#F35678', '#57B3FF', '#9D8BFF', '#F59E0B'];
 
         const topDecisionBasis = escapeHtml(results?.top_recommendation?.decision_basis || '');
+        const topConfidence = escapeHtml(results?.top_recommendation?.confidence || '');
+        const topStrength = escapeHtml(results?.top_recommendation?.strength_level || '');
+        const recommendationSummary = results?.recommendation_summary || null;
+        const strengthAssessment = results?.strength_assessment || null;
         const originalTopDomain = sortedDomains[0]?.[0] || null;
 
         const buildResultCard = (entry, isTop = false) => {
@@ -859,6 +964,42 @@ async function fetchAndDisplayResults() {
         const topMatchWrap = academicResultsContainer.querySelector('.radial-top-match-wrap');
         const otherStrandsWrap = academicResultsContainer.querySelector('.radial-other-strands');
 
+        const generateStrengthMeterChart = (strengthAssessment) => {
+            if (!strengthAssessment) return '';
+            
+            const level = strengthAssessment.strength_level || 'Unknown';
+            const levelMap = {
+                'Strong Match': { fill: '#10B981', percent: 90 },
+                'Moderate Match': { fill: '#F59E0B', percent: 60 },
+                'Weak Match': { fill: '#EF4444', percent: 40 },
+                'Poor Match': { fill: '#DC2626', percent: 20 }
+            };
+            
+            const config = levelMap[level] || levelMap['Moderate Match'];
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (config.percent / 100) * circumference;
+            
+            return `
+            <div style="margin-top: 0.85rem; padding: 0.85rem 0.95rem; background: var(--bg-light); border-left: 4px solid var(--primary); border-radius: 0.45rem;">
+                <p style="margin: 0 0 0.5rem; font-weight: 700; color: var(--primary-dark);">Assessment Strength</p>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <svg width="80" height="80" style="overflow: visible;">
+                        <circle cx="40" cy="40" r="35" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                        <circle cx="40" cy="40" r="35" fill="none" stroke="${config.fill}" stroke-width="8" 
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+                                stroke-linecap="round" style="transform: rotate(-90deg); transform-origin: 40px 40px; transition: stroke-dashoffset 0.3s;"/>
+                        <text x="40" y="45" text-anchor="middle" font-size="16" font-weight="bold" fill="${config.fill}">${config.percent}%</text>
+                    </svg>
+                    <div>
+                        <p style="margin: 0 0 0.25rem; font-weight: 700; color: ${config.fill};">${escapeHtml(level)}</p>
+                        <p style="margin: 0 0 0.3rem; color: var(--text-light); font-size: 0.9rem;">${escapeHtml(strengthAssessment.interpretation || '')}</p>
+                        <p style="margin: 0; color: #666; font-size: 0.85rem;">Range: ${escapeHtml(strengthAssessment.score_range || '')}</p>
+                    </div>
+                </div>
+            </div>
+            `;
+        };
+
         const renderAcademicDashboard = () => {
             if (!topMatchWrap || !otherStrandsWrap || !activeDomain) {
                 return;
@@ -870,13 +1011,26 @@ async function fetchAndDisplayResults() {
             }
 
             const remainingEntries = domainEntries.filter(item => item.domain !== activeEntry.domain);
-
             topMatchWrap.innerHTML = `
                 ${buildResultCard(activeEntry, true)}
                 <aside class="fixed-explanation-panel" aria-live="polite">
                     <span class="explanation-label">Why this strand fits</span>
                     <h4>${escapeHtml(activeEntry.info.title)} Recommendation Insight</h4>
                     <p>${activeEntry.explanationText}</p>
+                    ${strengthAssessment ? generateStrengthMeterChart(strengthAssessment) : ''}
+                    ${recommendationSummary ? `
+                    <div style="margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid rgba(0,0,0,0.06);">
+                        <p style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.6rem;">3 Reasons</p>
+                        <ol style="margin: 0 0 0.9rem; padding-left: 1.15rem; color: var(--text-light);">
+                            ${(recommendationSummary.reasons || []).slice(0, 3).map(reason => `<li style="margin-bottom: 0.35rem;">${escapeHtml(reason)}</li>`).join('')}
+                        </ol>
+                        <p style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.6rem;">2 Suggestions</p>
+                        <ol style="margin: 0; padding-left: 1.15rem; color: var(--text-light);">
+                            ${(recommendationSummary.suggestions || []).slice(0, 2).map(suggestion => `<li style="margin-bottom: 0.35rem;">${escapeHtml(suggestion)}</li>`).join('')}
+                        </ol>
+                        ${topConfidence ? `<p style="margin: 0.9rem 0 0; font-size: 0.9rem; color: #666;">Confidence: <strong>${topConfidence}</strong>${topStrength ? ` · Match level: <strong>${topStrength}</strong>` : ''}</p>` : ''}
+                    </div>
+                    ` : ''}
                 </aside>
             `;
 
@@ -907,6 +1061,8 @@ async function fetchAndDisplayResults() {
 
         // Render TVL sub-track scores from real backend explanation payload.
         const tvlSubtracks = results.tvl_subtracks || {};
+        const tvlAcademicEntry = domainEntries.find(item => item.domain === 'TVL');
+        const tvlAcademicPercent = Number(tvlAcademicEntry?.percentage || 0);
         if (tvlTrackSection && tvlResultsContainer) {
             const entries = [
                 {
@@ -933,15 +1089,25 @@ async function fetchAndDisplayResults() {
             ];
 
             const available = entries
-                .map(meta => ({ meta, data: tvlSubtracks[meta.key] }))
-                .filter(item => item.data && Number(item.data.percent) > 0);
+                .map(meta => {
+                    const data = tvlSubtracks[meta.key];
+                    const inTvlPercent = Number(data?.percent || 0);
+                    const overallPercent = Math.round((tvlAcademicPercent * inTvlPercent) / 100);
+                    return {
+                        meta,
+                        data,
+                        inTvlPercent,
+                        overallPercent
+                    };
+                })
+                .filter(item => item.data);
 
             if (available.length > 0) {
                 tvlTrackSection.style.display = '';
                 tvlResultsContainer.innerHTML = '';
 
                 available.forEach((item, idx) => {
-                    const pct = Math.round(Number(item.data.percent) || 0);
+                    const pct = item.overallPercent;
                     const chartColor = chartColors[(idx + 1) % chartColors.length];
                     const card = `
                         <div class="result-card tvl-circle-card">
@@ -956,7 +1122,7 @@ async function fetchAndDisplayResults() {
                                 <h3>${item.meta.icon} ${item.meta.title}</h3>
                                 <p style="color: var(--text-light); margin: 0.6rem 0 0;">${item.meta.desc}</p>
                             </div>
-                            <p class="tvl-caption">${pct}% TVL Sub-track Match</p>
+                            <p class="tvl-caption">${pct}% overall (from ${item.inTvlPercent}% of TVL)</p>
                             <p class="tvl-career">${item.meta.career}</p>
                         </div>
                     `;
