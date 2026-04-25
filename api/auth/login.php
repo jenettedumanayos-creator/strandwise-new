@@ -46,7 +46,7 @@ try {
         }
 
         $adminId = (int) $admin['admin_id'];
-        error_log('Login request failed: ' . $throwable->getMessage());
+        $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
         $stmt = $db->prepare('UPDATE admins SET last_login = CURRENT_TIMESTAMP, last_ip = ?, updated_at = CURRENT_TIMESTAMP WHERE admin_id = ?');
         $stmt->bind_param('si', $ipAddress, $adminId);
         $stmt->execute();

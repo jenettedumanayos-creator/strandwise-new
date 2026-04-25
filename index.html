@@ -29,6 +29,34 @@
             color: var(--primary);
             background-color: var(--white);
             line-height: 1.6;
+            position: relative;
+        }
+
+        /* Page Background Carousel */
+        .page-carousel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .carousel-slide.is-active {
+            opacity: 1;
         }
 
         /* Navigation */
@@ -40,7 +68,7 @@
             background-color: var(--white);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
             border-bottom: 1px solid #f0f0f0;
         }
 
@@ -115,14 +143,23 @@
 
         /* Hero Section */
         .hero {
-            padding: 6rem 5%;
-            background: linear-gradient(135deg, rgba(17, 17, 17, 0.05) 0%, rgba(118, 118, 118, 0.05) 100%);
-            text-align: center;
+            position: relative;
             min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 5%;
+            z-index: 1;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%);
+        }
+
+        .hero-content {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            text-align: left;
+            max-width: 600px;
+            z-index: 2;
         }
 
         .hero h1 {
@@ -130,27 +167,30 @@
             font-size: 3.5rem;
             line-height: 1.2;
             margin-bottom: 1rem;
-            color: var(--primary);
+            color: var(--white);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
         .hero p {
             font-size: 1.3rem;
-            color: var(--secondary);
+            color: rgba(255, 255, 255, 0.95);
             margin-bottom: 2rem;
-            max-width: 600px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
         .hero-cta {
             display: flex;
             gap: 1rem;
-            justify-content: center;
+            justify-content: flex-start;
             flex-wrap: wrap;
         }
 
         /* Features Section */
         .features {
             padding: 5rem 5%;
-            background-color: var(--light-gray);
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.5) 100%);
         }
 
         .section-title {
@@ -158,12 +198,12 @@
             font-size: 2.5rem;
             text-align: center;
             margin-bottom: 1rem;
-            color: var(--primary);
+            color: var(--white);
         }
 
         .section-subtitle {
             text-align: center;
-            color: var(--secondary);
+            color: rgba(255, 255, 255, 0.9);
             margin-bottom: 4rem;
             font-size: 1.1rem;
         }
@@ -177,12 +217,12 @@
         }
 
         .feature-card {
-            background-color: var(--white);
+            background-color: rgba(255, 255, 255, 0.95);
             padding: 2rem;
             border-radius: 8px;
             border-left: 4px solid var(--primary);
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .feature-card:hover {
@@ -210,6 +250,9 @@
         /* How It Works Section */
         .how-it-works {
             padding: 5rem 5%;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.5) 100%);
         }
 
         .steps-container {
@@ -231,8 +274,8 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background-color: var(--primary);
-            color: var(--white);
+            background-color: var(--accent);
+            color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -245,18 +288,20 @@
             font-family: 'Georgia', serif;
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
-            color: var(--primary);
+            color: var(--white);
         }
 
         .step p {
-            color: var(--secondary);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.95rem;
         }
 
         /* Benefits Section */
         .benefits {
             padding: 5rem 5%;
-            background-color: var(--light-gray);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.5) 100%);
+            position: relative;
+            z-index: 1;
         }
 
         .benefits-content {
@@ -272,7 +317,7 @@
             font-family: 'Georgia', serif;
             font-size: 2rem;
             margin-bottom: 1.5rem;
-            color: var(--primary);
+            color: var(--white);
         }
 
         .benefit-item {
@@ -282,32 +327,35 @@
         }
 
         .benefit-check {
-            color: var(--primary);
+            color: var(--accent);
             font-weight: 700;
             font-size: 1.2rem;
             flex-shrink: 0;
         }
 
         .benefit-item p {
-            color: var(--secondary);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .benefits-image {
-            background: linear-gradient(135deg, #d6cfc4 0%, #e8e2d8 100%);
+            background: linear-gradient(135deg, rgba(214, 207, 196, 0.3) 0%, rgba(232, 226, 216, 0.2) 100%);
             height: 400px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
         /* CTA Section */
         .cta {
             padding: 4rem 5%;
-            background-color: var(--primary);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.6) 100%);
             color: var(--white);
             text-align: center;
+            position: relative;
+            z-index: 1;
         }
 
         .cta h2 {
@@ -344,11 +392,13 @@
 
         /* Footer */
         footer {
-            background-color: #0a0a0a;
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(5, 5, 5, 0.95) 100%);
             color: var(--accent);
             padding: 3rem 5%;
             text-align: center;
             font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
         }
 
         .footer-content {
@@ -395,12 +445,26 @@
                 display: none;
             }
 
+            .hero {
+                min-height: 500px;
+                padding: 2rem 5%;
+            }
+
+            .hero-content {
+                text-align: center;
+                max-width: 100%;
+            }
+
             .hero h1 {
                 font-size: 2.5rem;
             }
 
             .hero p {
                 font-size: 1.1rem;
+            }
+
+            .hero-cta {
+                justify-content: center;
             }
 
             .section-title {
@@ -419,11 +483,6 @@
                 font-size: 1.8rem;
             }
 
-            .hero-cta {
-                flex-direction: column;
-                align-items: center;
-            }
-
             .btn-primary,
             .btn-signin {
                 width: 100%;
@@ -434,6 +493,12 @@
 </head>
 
 <body>
+    <!-- Page Background Carousel -->
+    <div class="page-carousel">
+        <div class="carousel-slide is-active"></div>
+        <div class="carousel-slide"></div>
+    </div>
+
     <!-- Navigation -->
     <nav>
         <a href="index.html" class="logo">
@@ -452,12 +517,14 @@
 
     <!-- Hero Section -->
     <section class="hero">
-        <h1>Discover Your Perfect Academic Path</h1>
-        <p>StrandWise uses AI-powered assessment to match you with the ideal academic strand that aligns with your
-            strengths, interests, and goals.</p>
-        <div class="hero-cta">
-            <a href="login.html" class="btn-primary">Start Assessment</a>
-            <a href="#features" class="btn-signin">Learn More</a>
+        <div class="hero-content">
+            <h1>Discover Your Perfect Academic Path</h1>
+            <p>StrandWise uses AI-powered assessment to match you with the ideal academic strand that aligns with your
+                strengths, interests, and goals.</p>
+            <div class="hero-cta">
+                <a href="login.html" class="btn-primary">Start Assessment</a>
+                <a href="#features" class="btn-signin">Learn More</a>
+            </div>
         </div>
     </section>
 
@@ -614,9 +681,15 @@
             <p>&copy; 2026 StrandWise. All rights reserved. Empowering students to find their perfect academic path.</p>
         </div>
     </footer>
+    <script src="carousel.js"></script>
     <script>
         // Mark that user is coming from landing page
         sessionStorage.setItem('visitedFromLanding', 'true');
+
+        // Initialize carousel on landing page
+        window.addEventListener('DOMContentLoaded', () => {
+            initCarousel('.page-carousel');
+        });
     </script>
 </body>
 
