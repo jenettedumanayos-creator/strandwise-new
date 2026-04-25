@@ -169,13 +169,16 @@
                         <div class="ai-progress-header">
                             <h3>🤖 AI Training Progress (Auto-Training Active)</h3>
                             <div class="ai-progress-actions">
-                                <button class="btn-small btn-primary" id="aiTrainBtn" onclick="startModelTraining()">⚡ Force Train</button>
+                                <button class="btn-small btn-primary" id="aiTrainBtn" onclick="startModelTraining()">⚡
+                                    Force Train</button>
                                 <button class="btn-small btn-info" onclick="loadModelProgress()">Refresh</button>
                             </div>
                         </div>
-                        <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1rem; margin-bottom: 1rem; border-radius: 0.3rem; font-size: 0.95rem; color: #2e7d32;">
+                        <div
+                            style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1rem; margin-bottom: 1rem; border-radius: 0.3rem; font-size: 0.95rem; color: #2e7d32;">
                             <strong>✓ Auto-Training Enabled</strong><br>
-                            Model automatically trains after each student assessment (triggers on ≥5 new assessments or ≥6 hours since last training).
+                            Model automatically trains after each student assessment (triggers on ≥5 new assessments or
+                            ≥6 hours since last training).
                         </div>
                         <p class="ai-progress-phase" id="aiCurrentPhase">Phase: Data Preparation</p>
                         <p class="ai-progress-run-status" id="aiRunStatus">Last run: none yet</p>
@@ -257,6 +260,7 @@
                                     <th>Email</th>
                                     <th>School</th>
                                     <th>Grade</th>
+                                    <th>Assessment</th>
                                     <th>Status</th>
                                     <th>Joined</th>
                                     <th>Actions</th>
@@ -268,6 +272,7 @@
                                     <td>john@example.com</td>
                                     <td>Sample High School</td>
                                     <td>Grade 11</td>
+                                    <td><span class="badge success">Completed</span></td>
                                     <td><span class="badge active">Active</span></td>
                                     <td>2024-03-15</td>
                                     <td>
@@ -280,6 +285,7 @@
                                     <td>jane@example.com</td>
                                     <td>Central High School</td>
                                     <td>Grade 10</td>
+                                    <td><span class="badge warning">Not Started</span></td>
                                     <td><span class="badge active">Active</span></td>
                                     <td>2024-03-12</td>
                                     <td>
@@ -462,10 +468,13 @@
                         <p>Review and audit student recommendation decisions with explainability data</p>
                     </div>
 
-                    <div class="quality-controls" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+                    <div class="quality-controls"
+                        style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
                         <div style="flex: 1; min-width: 200px;">
-                            <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Filter by Strand</label>
-                            <select id="filterStrandSelect" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.3rem;">
+                            <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Filter by
+                                Strand</label>
+                            <select id="filterStrandSelect"
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.3rem;">
                                 <option value="">All Strands</option>
                                 <option value="STEM">STEM</option>
                                 <option value="ABM">ABM</option>
@@ -475,30 +484,38 @@
                             </select>
                         </div>
                         <div style="flex: 0.5; min-width: 150px;">
-                            <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Min Confidence</label>
-                            <input type="number" id="filterConfidence" placeholder="%" min="0" max="100" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.3rem;">
+                            <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Min
+                                Confidence</label>
+                            <input type="number" id="filterConfidence" placeholder="%" min="0" max="100"
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.3rem;">
                         </div>
                         <div style="flex: 0.5; min-width: 150px;">
-                            <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Requires Review</label>
-                            <select id="filterCounselor" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.3rem;">
+                            <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Requires
+                                Review</label>
+                            <select id="filterCounselor"
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.3rem;">
                                 <option value="">Any</option>
                                 <option value="yes">Yes</option>
                                 <option value="no">No</option>
                             </select>
                         </div>
                         <div style="align-self: flex-end;">
-                            <button class="btn-primary" onclick="loadDecisionPaths()" style="padding: 0.5rem 1rem;">Apply Filters</button>
-                            <button class="btn-secondary" onclick="exportDecisionPaths()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Export CSV</button>
+                            <button class="btn-primary" onclick="loadDecisionPaths()"
+                                style="padding: 0.5rem 1rem;">Apply Filters</button>
+                            <button class="btn-secondary" onclick="exportDecisionPaths()"
+                                style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Export CSV</button>
                         </div>
                     </div>
 
-                    <div id="decisionPathsContainer" style="background: white; border-radius: 0.5rem; overflow: hidden;">
+                    <div id="decisionPathsContainer"
+                        style="background: white; border-radius: 0.5rem; overflow: hidden;">
                         <div style="padding: 2rem; text-align: center; color: #999;">
                             <p>Loading decision paths...</p>
                         </div>
                     </div>
 
-                    <div id="decisionPathsPagination" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <div id="decisionPathsPagination"
+                        style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
                         <!-- Pagination will be inserted here -->
                     </div>
                 </section>

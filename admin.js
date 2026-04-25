@@ -242,9 +242,38 @@ async function handleAddAssessmentSubmit(event) {
 async function loadDashboardData() {
     try {
         const response = await apiRequest('/admin/stats.php', { method: 'GET' });
-        updateStats(response.data || {});
+        const stats = response.data || {};
+        updateStats(stats);
+
+        // Keep dashboard user counts aligned with Users table source (students.php).
+        if (Number(stats.total_users ?? 0) === 0) {
+            try {
+                const studentsResponse = await apiRequest('/admin/students.php?limit=200', { method: 'GET' });
+                const students = Array.isArray(studentsResponse.data) ? studentsResponse.data : [];
+                if (students.length > 0) {
+                    updateStats({
+                        ...stats,
+                        total_users: students.length,
+                        total_students: students.length
+                    });
+                }
+            } catch (_) {
+                // Ignore fallback errors and keep current stats display.
+            }
+        }
     } catch (err) {
-        await uiAlert(`Failed to load dashboard stats: ${err.message}`, 'Request Failed');
+        // Fallback: derive users directly from students endpoint if stats endpoint fails.
+        try {
+            const studentsResponse = await apiRequest('/admin/students.php?limit=200', { method: 'GET' });
+            const students = Array.isArray(studentsResponse.data) ? studentsResponse.data : [];
+            updateStats({
+                total_users: students.length,
+                total_students: students.length,
+                total_survey_responses: 0
+            });
+        } catch (_) {
+            await uiAlert(`Failed to load dashboard stats: ${err.message}`, 'Request Failed');
+        }
     }
 
     loadModelProgress();
@@ -520,12 +549,21 @@ async function loadUsersTable(search = '') {
         const response = await apiRequest(`/admin/students.php?${params.toString()}`, { method: 'GET' });
         const users = response.data || [];
 
+        // When listing all users (no search), mirror the dashboard counters.
+        if (search.trim() === '') {
+            const totalUsers = document.getElementById('totalUsers');
+            const activeSessions = document.getElementById('activeSessions');
+            if (totalUsers) totalUsers.textContent = String(users.length);
+            if (activeSessions) activeSessions.textContent = String(users.length);
+        }
+
         tbody.innerHTML = users.map(user => `
             <tr>
                 <td>${user.first_name} ${user.last_name}</td>
                 <td>${user.email}</td>
                 <td>${user.school_name || '-'}</td>
                 <td>${user.grade_level || '-'}</td>
+                <td><span class="badge ${user.assessment_completed ? 'success' : 'warning'}">${user.assessment_completed ? 'Completed' : 'Not Started'}</span></td>
                 <td><span class="badge ${user.status === 'active' ? 'active' : 'warning'}">${user.status}</span></td>
                 <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
                 <td>
@@ -537,10 +575,10 @@ async function loadUsersTable(search = '') {
         `).join('');
 
         if (users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7">No users found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8">No users found.</td></tr>';
         }
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7">Failed to load users: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8">Failed to load users: ${err.message}</td></tr>`;
     }
 }
 

@@ -6,11 +6,12 @@ require_role('admin');
 
 $db = get_db_connection();
 
-$search = trim((string)($_GET['search'] ?? ''));
-$grade = trim((string)($_GET['grade'] ?? ''));
-$limit = min(max((int)($_GET['limit'] ?? 50), 1), 200);
+$search = trim((string) ($_GET['search'] ?? ''));
+$grade = trim((string) ($_GET['grade'] ?? ''));
+$limit = min(max((int) ($_GET['limit'] ?? 50), 1), 200);
 
-$sql = 'SELECT st.student_id, u.user_id, st.first_name, st.last_name, st.grade_level, u.email, u.status, u.created_at, sc.school_name
+$sql = 'SELECT st.student_id, u.user_id, st.first_name, st.last_name, st.grade_level, u.email, u.status, u.created_at, sc.school_name,
+        (SELECT 1 FROM assessment_results ar WHERE ar.student_id = st.student_id LIMIT 1) AS assessment_completed
         FROM students st
         INNER JOIN users u ON u.user_id = st.user_id
         LEFT JOIN schools sc ON sc.school_id = u.school_id
