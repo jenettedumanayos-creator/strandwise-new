@@ -183,11 +183,20 @@
             <!-- Assessment Section -->
             <section class="content-section" id="assessment-section">
                 <div class="assessment-form">
-                    <h2 style="margin-bottom: 0.5rem; color: var(--text-dark);">Take the Assessment</h2>
-                    <p style="color: var(--text-light); margin-bottom: 2rem;">Answer the following questions to help us
-                        understand your interests and strengths.</p>
+                    <div class="assessment-header">
+                        <h2 class="assessment-title">Take the Assessment</h2>
+                        <p class="assessment-subtitle">Answer the following questions to help us understand your interests and strengths.</p>
+                        <div class="assessment-progress-header">
+                            <span class="assessment-progress-count" id="assessmentQuestionCounter">Q1 of 35</span>
+                            <span class="assessment-progress-percent" id="assessmentProgressPercent">3%</span>
+                        </div>
+                        <div class="assessment-progress-track" aria-hidden="true">
+                            <div class="assessment-progress-fill" id="assessmentProgressFill" style="width: 3%;"></div>
+                        </div>
+                    </div>
 
-                    <div class="question-card">
+                    <div class="assessment-questions">
+                        <div class="question-card">
                         <h4>1. Which subject do you find most enjoyable and easiest to understand?</h4>
                         <div class="options-group">
                             <label class="radio-option">
@@ -208,7 +217,7 @@
                         </div>
                     </div>
 
-                    <div class="question-card">
+                        <div class="question-card">
                         <h4>2. When given a difficult problem in school, how do you usually approach it?</h4>
                         <div class="options-group">
                             <label class="radio-option">
@@ -1046,7 +1055,17 @@
                         </div>
                     </div>
 
-                    <button class="submit-btn" id="assessmentActionBtn" type="button" disabled>Next</button>
+                    </div>
+
+                    <div class="assessment-tip" id="assessmentTip">
+                        Think about what genuinely fits you best, not just what feels easiest at first glance.
+                    </div>
+
+                    <div class="assessment-nav">
+                        <button class="submit-btn secondary" id="assessmentPrevBtn" type="button"
+                            disabled>Previous</button>
+                        <button class="submit-btn" id="assessmentActionBtn" type="button" disabled>Next</button>
+                    </div>
                 </div>
             </section>
 
@@ -1141,6 +1160,19 @@
 
             <!-- Explore Section -->
             <section class="content-section" id="explore-section">
+                <div class="explore-showcase">
+                    <div class="explore-showcase-header">
+                        <span class="explore-kicker">Strand Library</span>
+                        <h2>Explore the strands</h2>
+                        <p>Browse each path, compare the learning focus, and see where every strand can lead.</p>
+                    </div>
+
+                    <div class="explore-carousel-stack">
+                        <div class="explore-carousel-card" id="academicExploreCarousel"></div>
+                        <div class="explore-carousel-card" id="tvlExploreCarousel"></div>
+                    </div>
+                </div>
+
                 <!-- Academic Track Exploration -->
                 <div class="track-section">
                     <h2 class="track-title">📚 Academic Track - Detailed Exploration</h2>
@@ -1224,7 +1256,7 @@
                         <div class="profile-avatar" id="profileAvatarMain">👤</div>
                         <div class="profile-header-info">
                             <div class="profile-name" id="profileNameHeader">Student Name</div>
-                            <div class="profile-title">Grade 10 Student</div>
+                            <div class="profile-title" id="profileTitleHeader">Grade 10 Student</div>
                             <div class="profile-meta">
                                 <div class="profile-meta-item">
                                     <span class="profile-meta-label">ID Number</span>
@@ -1236,7 +1268,7 @@
                                 </div>
                                 <div class="profile-meta-item">
                                     <span class="profile-meta-label">Status</span>
-                                    <span class="profile-meta-value" style="color: #10B981;">Active</span>
+                                    <span class="profile-meta-value" id="profileStatusHeader" style="color: #10B981;">Active</span>
                                 </div>
                             </div>
                         </div>
@@ -1267,12 +1299,12 @@
                                         <span class="info-value" id="profileSchoolDetail">Example High School</span>
                                     </div>
                                     <div class="info-item">
-                                        <span class="info-label">Age</span>
-                                        <span class="info-value" id="profileAgeDetail">16 years old</span>
+                                        <span class="info-label">Account Type</span>
+                                        <span class="info-value" id="profileRoleDetail">Student</span>
                                     </div>
                                     <div class="info-item">
-                                        <span class="info-label">Phone</span>
-                                        <span class="info-value" id="profilePhoneDetail">Not provided</span>
+                                        <span class="info-label">Registered On</span>
+                                        <span class="info-value" id="profileCreatedDetail">March 28, 2024</span>
                                     </div>
                                 </div>
                             </div>

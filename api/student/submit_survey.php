@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
+ob_start();
 
 require_once __DIR__ . '/../bootstrap.php';
 
@@ -592,7 +593,10 @@ try {
     ];
 
     $decisionBasis = implode(' ', $tieResolution['decision_path']) . ' Final score band: ' . $band['strength_level'] . '.';
-    $explanationText = json_encode($explanationPayload, JSON_UNESCAPED_UNICODE);
+    $explanationText = json_encode($explanationPayload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    if ($explanationText === false) {
+        throw new Exception('Failed to encode recommendation explanation payload.');
+    }
 
     $stmt = $db->prepare('INSERT INTO recommendations (student_id, model_id, recommended_strand_id, confidence_score, external_factors_considered, final_decision_basis, explanation_text) VALUES (?, ?, ?, ?, FALSE, ?, ?)');
     $stmt->bind_param('iiidss', $studentId, $modelId, $recommendedStrandId, $confidence, $decisionBasis, $explanationText);

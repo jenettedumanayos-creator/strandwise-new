@@ -497,22 +497,32 @@ html, body {
 }
 
 .google-btn::before {
-    content: '🔵 ';
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background: url('img/google.png') center/contain no-repeat;
+    vertical-align: middle;
     margin-right: 0.25rem;
 }
 
-.apple-btn {
+.facebook-btn {
     background: #111111;
     color: var(--white);
     border-color: #111111;
 }
 
-.apple-btn::before {
-    content: '🍎 ';
+.facebook-btn::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background: url('img/facebook.png') center/contain no-repeat;
+    vertical-align: middle;
     margin-right: 0.25rem;
 }
 
-.apple-btn:hover {
+.facebook-btn:hover {
     background: #222222;
     border-color: #222222;
 }
@@ -805,13 +815,13 @@ body::before {
     background: #ffffff;
 }
 
-.apple-btn {
+.facebook-btn {
     background: #111111;
     color: #ffffff;
     border-color: #111111;
 }
 
-.apple-btn:hover,
+.facebook-btn:hover,
 .google-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 8px 24px rgba(17, 17, 17, 0.08);

@@ -2,7 +2,134 @@ const API_BASE = 'api';
 let currentUser = null;
 let latestResultsData = null;
 let assessmentWizardInitialized = false;
-let autoAdvanceTimer = null;
+let exploreCarouselsInitialized = false;
+const ASSESSMENT_QUESTION_TOPICS = [
+    'Favorite Subjects',
+    'Problem Solving',
+    'School Projects',
+    'Numbers and Data',
+    'Voluntary Activities',
+    'Group Work',
+    'Reading Choices',
+    'Research and Writing',
+    'Science Performance',
+    'Seminar Choice',
+    'Career Path',
+    'Future Workplace',
+    'College Plans',
+    'Dream Job',
+    'Community Impact',
+    'Job Satisfaction',
+    'Success Definition',
+    'Career Preparation',
+    'Skills to Build',
+    'Alternative Path',
+    'Work Preferences',
+    'Learning Style',
+    'Pressure Response',
+    'Ideal Environment',
+    'Self Expression',
+    'Long-Term Projects',
+    'Routine Tasks',
+    'Ideal Self',
+    'Family Expectations',
+    'Financial Situation',
+    'Family Livelihood',
+    'Family Influence',
+    'Loans or Scholarships',
+    'Job Security',
+    'Community Background'
+];
+const EXPLORE_CAROUSEL_DATA = [
+    {
+        targetId: 'academicExploreCarousel',
+        label: 'Academic track',
+        title: 'Explore the academic strands',
+        subtitle: 'Use the arrows or dots to compare the core academic paths.',
+        autoLabel: 'Auto-advancing',
+        slides: [
+            {
+                strand: 'STEM strand',
+                title: 'Science, Technology, Engineering and Mathematics',
+                description: 'Build depth in scientific thinking, experimentation, and technical problem-solving.',
+                pills: ['Biology', 'Chemistry', 'Physics', 'Mathematics'],
+                roles: 'Doctor | Engineer | Researcher | Data specialist',
+                cta: 'View key paths',
+                image: 'img/carousel/stem1.jpg',
+                accent: '#1a1060'
+            },
+            {
+                strand: 'ABM strand',
+                title: 'Accountancy, Business and Management',
+                description: 'Strengthen decision-making, finance, entrepreneurship, and leadership skills.',
+                pills: ['Accounting', 'Economics', 'Marketing', 'Business planning'],
+                roles: 'Accountant | Entrepreneur | Manager | Analyst',
+                cta: 'View key paths',
+                image: 'img/carousel/business1.jpg',
+                accent: '#0a2540'
+            },
+            {
+                strand: 'HUMSS strand',
+                title: 'Humanities and Social Sciences',
+                description: 'Study people, culture, communication, and the forces that shape communities.',
+                pills: ['Literature', 'History', 'Sociology', 'Public speaking'],
+                roles: 'Teacher | Journalist | Lawyer | Community leader',
+                cta: 'View key paths',
+                image: 'img/carousel/school.jpg',
+                accent: '#1a0a2e'
+            },
+            {
+                strand: 'GAS strand',
+                title: 'General Academic Strand',
+                description: 'Keep your options open while building a broad and flexible academic foundation.',
+                pills: ['Core subjects', 'Flexible electives', 'College prep', 'Multi-discipline'],
+                roles: 'Flexible entry point for many college routes',
+                cta: 'View key paths',
+                image: 'img/carousel/stem3.jpg',
+                accent: '#0f2e1a'
+            }
+        ]
+    },
+    {
+        targetId: 'tvlExploreCarousel',
+        label: 'TVL track',
+        title: 'Explore the technical-vocational strands',
+        subtitle: 'See the hands-on pathways designed for applied skills and early career readiness.',
+        autoLabel: 'Auto-advancing',
+        slides: [
+            {
+                strand: 'ICT strand',
+                title: 'Information and Communications Technology',
+                description: 'Learn programming, troubleshooting, networking, and modern digital systems.',
+                pills: ['Programming', 'Networks', 'Web systems', 'Technical support'],
+                roles: 'Developer | IT support | Network technician | QA assistant',
+                cta: 'View key paths',
+                image: 'img/carousel/ict1.jpg',
+                accent: '#12263f'
+            },
+            {
+                strand: 'Cookery strand',
+                title: 'Cookery and Culinary Arts',
+                description: 'Train in food preparation, kitchen operations, service standards, and hospitality.',
+                pills: ['Food prep', 'Kitchen safety', 'Menu planning', 'Hospitality'],
+                roles: 'Chef | Baker | Catering staff | Food entrepreneur',
+                cta: 'View key paths',
+                image: 'img/carousel/cooking.jpg',
+                accent: '#3b190f'
+            },
+            {
+                strand: 'Industrial Arts strand',
+                title: 'Industrial Arts and Skilled Trades',
+                description: 'Develop practical strengths in tools, repair work, fabrication, and technical systems.',
+                pills: ['Electronics', 'Automotive', 'Electrical work', 'Fabrication'],
+                roles: 'Technician | Electrician | Mechanic | Trade specialist',
+                cta: 'View key paths',
+                image: 'img/carousel/ict2.jpg',
+                accent: '#1f2429'
+            }
+        ]
+    }
+];
 
 function uiAlert(message, title = 'Notice') {
     if (window.AppUI?.alert) {
@@ -30,7 +157,19 @@ async function apiRequest(path, options = {}) {
         ...options
     });
 
-    const data = await response.json().catch(() => ({ success: false, message: 'Invalid server response' }));
+    const rawText = await response.text();
+    let data;
+
+    try {
+        data = rawText ? JSON.parse(rawText) : { success: false, message: 'Empty server response' };
+    } catch (_err) {
+        const preview = rawText.trim().slice(0, 180);
+        data = {
+            success: false,
+            message: preview ? `Invalid server response: ${preview}` : 'Invalid server response'
+        };
+    }
+
     if (!response.ok || !data.success) {
         throw new Error(data.message || `Request failed (${response.status})`);
     }
@@ -46,6 +185,9 @@ function persistSession(user) {
     localStorage.setItem('userName', fullName || user.email || 'User');
     localStorage.setItem('userSchool', user.school_name || '');
     localStorage.setItem('userGrade', user.grade_level || '');
+    localStorage.setItem('userStudentId', user.student_id || '');
+    localStorage.setItem('userCreatedAt', user.created_at || '');
+    localStorage.setItem('userStatus', user.status || '');
 }
 
 function clearSessionStorage() {
@@ -55,6 +197,9 @@ function clearSessionStorage() {
     localStorage.removeItem('userSchool');
     localStorage.removeItem('userGrade');
     localStorage.removeItem('userType');
+    localStorage.removeItem('userStudentId');
+    localStorage.removeItem('userCreatedAt');
+    localStorage.removeItem('userStatus');
 }
 
 function getProgressStorageKey() {
@@ -275,6 +420,38 @@ function scrollToTop() {
     window.scrollTo(0, 0);
 }
 
+function formatProfileDate(dateValue) {
+    if (!dateValue) {
+        return 'Not available';
+    }
+
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) {
+        return String(dateValue);
+    }
+
+    return parsed.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function formatProfileStudentId(user) {
+    const numericId = Number(user?.student_id || localStorage.getItem('userStudentId') || 0);
+    if (!numericId) {
+        return 'Not available';
+    }
+
+    const createdAt = user?.created_at || localStorage.getItem('userCreatedAt') || '';
+    const parsed = createdAt ? new Date(createdAt) : null;
+    const year = parsed && !Number.isNaN(parsed.getTime())
+        ? parsed.getFullYear()
+        : new Date().getFullYear();
+
+    return `SW-${year}-${String(numericId).padStart(3, '0')}`;
+}
+
 function loadUserData() {
     const userName = currentUser
         ? `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim()
@@ -282,6 +459,12 @@ function loadUserData() {
     const userEmail = currentUser?.email || localStorage.getItem('userEmail') || 'user@example.com';
     const userSchool = currentUser?.school_name || localStorage.getItem('userSchool') || 'Example School';
     const userGrade = currentUser?.grade_level || localStorage.getItem('userGrade') || 'Grade 10';
+    const userRole = (currentUser?.role || localStorage.getItem('userType') || 'student').toLowerCase();
+    const userStatus = currentUser?.status || localStorage.getItem('userStatus') || 'active';
+    const createdAt = currentUser?.created_at || localStorage.getItem('userCreatedAt') || '';
+    const profileId = formatProfileStudentId(currentUser);
+    const fullRoleLabel = userRole ? `${userRole.charAt(0).toUpperCase()}${userRole.slice(1)}` : 'Student';
+    const statusLabel = userStatus ? `${userStatus.charAt(0).toUpperCase()}${userStatus.slice(1)}` : 'Active';
 
     const initials = userName
         .split(' ')
@@ -295,20 +478,40 @@ function loadUserData() {
         userAvatar.textContent = initials;
     }
 
+    const profileAvatarMain = document.getElementById('profileAvatarMain');
+    if (profileAvatarMain) {
+        profileAvatarMain.setAttribute('aria-label', `${userName} profile avatar`);
+        profileAvatarMain.setAttribute('title', userName);
+    }
+
     const welcomeMessage = document.getElementById('welcomeMessage');
     if (welcomeMessage) {
         welcomeMessage.textContent = `Hello, ${userName}! Welcome to your personal strand recommendation dashboard. This is your space to discover which academic strand aligns best with your interests, strengths, and career goals.`;
     }
 
-    const profileName = document.getElementById('profileName');
-    const profileEmail = document.getElementById('profileEmail');
-    const profileSchool = document.getElementById('profileSchool');
-    const profileGrade = document.getElementById('profileGrade');
+    const profileNameHeader = document.getElementById('profileNameHeader');
+    const profileTitleHeader = document.getElementById('profileTitleHeader');
+    const profileIDHeader = document.getElementById('profileIDHeader');
+    const profileDateHeader = document.getElementById('profileDateHeader');
+    const profileStatusHeader = document.getElementById('profileStatusHeader');
+    const profileNameDetail = document.getElementById('profileNameDetail');
+    const profileEmailDetail = document.getElementById('profileEmailDetail');
+    const profileGradeDetail = document.getElementById('profileGradeDetail');
+    const profileSchoolDetail = document.getElementById('profileSchoolDetail');
+    const profileRoleDetail = document.getElementById('profileRoleDetail');
+    const profileCreatedDetail = document.getElementById('profileCreatedDetail');
 
-    if (profileName) profileName.textContent = userName;
-    if (profileEmail) profileEmail.textContent = userEmail;
-    if (profileSchool) profileSchool.textContent = userSchool;
-    if (profileGrade) profileGrade.textContent = userGrade;
+    if (profileNameHeader) profileNameHeader.textContent = userName;
+    if (profileTitleHeader) profileTitleHeader.textContent = `${userGrade} ${fullRoleLabel}`;
+    if (profileIDHeader) profileIDHeader.textContent = profileId;
+    if (profileDateHeader) profileDateHeader.textContent = formatProfileDate(createdAt);
+    if (profileStatusHeader) profileStatusHeader.textContent = statusLabel;
+    if (profileNameDetail) profileNameDetail.textContent = userName;
+    if (profileEmailDetail) profileEmailDetail.textContent = userEmail;
+    if (profileGradeDetail) profileGradeDetail.textContent = userGrade;
+    if (profileSchoolDetail) profileSchoolDetail.textContent = userSchool;
+    if (profileRoleDetail) profileRoleDetail.textContent = fullRoleLabel;
+    if (profileCreatedDetail) profileCreatedDetail.textContent = formatProfileDate(createdAt);
 }
 
 function toggleSidebar() {
@@ -404,6 +607,123 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+function getAssessmentQuestionTopic(questionNumber) {
+    return ASSESSMENT_QUESTION_TOPICS[questionNumber - 1] || 'Assessment';
+}
+
+function getAssessmentQuestionTip(questionNumber) {
+    if (questionNumber === 3) {
+        return 'Think about projects you genuinely enjoyed, not just ones you were good at - both matter.';
+    }
+
+    if (questionNumber <= 10) {
+        return 'Base your choice on the classwork and activities that naturally keep your attention.';
+    }
+
+    if (questionNumber <= 20) {
+        return 'Choose the path that feels most motivating to grow into, even if you are still exploring.';
+    }
+
+    if (questionNumber <= 28) {
+        return 'Answer based on your usual habits and strengths, not the version of yourself you feel pressured to show.';
+    }
+
+    return 'Be honest about family and financial realities so your recommendation stays practical and helpful.';
+}
+
+function syncQuestionSelectionState(card) {
+    const options = card.querySelectorAll('.radio-option');
+    options.forEach((option) => {
+        const input = option.querySelector('input[type="radio"]');
+        option.classList.toggle('is-selected', Boolean(input?.checked));
+    });
+}
+
+function decorateAssessmentCard(card, index) {
+    if (card.dataset.decorated === 'true') {
+        syncQuestionSelectionState(card);
+        return;
+    }
+
+    const questionNumber = index + 1;
+    const title = card.querySelector('h4');
+
+    if (title) {
+        const cleanTitle = title.textContent.replace(/^\d+\.\s*/, '').replace(/\s+/g, ' ').trim();
+        title.textContent = cleanTitle;
+
+        const header = document.createElement('div');
+        header.className = 'question-card-header';
+
+        const symbol = document.createElement('div');
+        symbol.className = 'question-card-symbol';
+        symbol.setAttribute('aria-hidden', 'true');
+
+        const label = document.createElement('div');
+        label.className = 'question-card-label';
+        label.textContent = `Question ${questionNumber} - ${getAssessmentQuestionTopic(questionNumber)}`;
+
+        header.append(symbol, label);
+        title.insertAdjacentElement('beforebegin', header);
+    }
+
+    const optionLabels = Array.from(card.querySelectorAll('.radio-option'));
+    optionLabels.forEach((option, optionIndex) => {
+        const input = option.querySelector('input[type="radio"]');
+        if (!input) {
+            return;
+        }
+
+        const optionText = option.textContent.replace(/\s+/g, ' ').trim();
+        option.textContent = '';
+        option.appendChild(input);
+
+        const control = document.createElement('span');
+        control.className = 'radio-option-control';
+        control.setAttribute('aria-hidden', 'true');
+
+        const letter = document.createElement('span');
+        letter.className = 'radio-option-letter';
+        letter.setAttribute('aria-hidden', 'true');
+        letter.textContent = String.fromCharCode(65 + optionIndex);
+
+        const text = document.createElement('span');
+        text.className = 'radio-option-text';
+        text.textContent = optionText;
+
+        option.append(control, letter, text);
+    });
+
+    syncQuestionSelectionState(card);
+    card.dataset.decorated = 'true';
+}
+
+function updateAssessmentProgressUI(currentIndex, totalQuestions) {
+    const questionNumber = currentIndex + 1;
+    const progressPercent = Math.max(1, Math.round((questionNumber / Math.max(totalQuestions, 1)) * 100));
+
+    const counter = document.getElementById('assessmentQuestionCounter');
+    const percent = document.getElementById('assessmentProgressPercent');
+    const fill = document.getElementById('assessmentProgressFill');
+    const tip = document.getElementById('assessmentTip');
+
+    if (counter) {
+        counter.textContent = `Q${questionNumber} of ${totalQuestions}`;
+    }
+
+    if (percent) {
+        percent.textContent = `${progressPercent}%`;
+    }
+
+    if (fill) {
+        fill.style.width = `${progressPercent}%`;
+    }
+
+    if (tip) {
+        tip.textContent = getAssessmentQuestionTip(questionNumber);
+    }
+}
+
 function collectAssessmentPayload() {
     const questionCards = document.querySelectorAll('#assessment-section .question-card');
     const responses = [];
@@ -461,10 +781,15 @@ function initAssessmentWizard() {
     }
 
     const questionCards = Array.from(assessmentSection.querySelectorAll('.question-card'));
+    const prevBtn = document.getElementById('assessmentPrevBtn');
     const actionBtn = document.getElementById('assessmentActionBtn');
-    if (!questionCards.length || !actionBtn) {
+    if (!questionCards.length || !actionBtn || !prevBtn) {
         return;
     }
+
+    questionCards.forEach((card, index) => {
+        decorateAssessmentCard(card, index);
+    });
 
     const lastIndex = questionCards.length - 1;
     let currentIndex = 0;
@@ -475,8 +800,9 @@ function initAssessmentWizard() {
     };
 
     const updateButtonState = () => {
-        actionBtn.textContent = currentIndex === lastIndex ? 'Submit' : 'Next';
+        actionBtn.textContent = currentIndex === lastIndex ? 'Submit Assessment' : 'Next';
         actionBtn.disabled = !hasAnswer(currentIndex);
+        prevBtn.disabled = currentIndex === 0;
     };
 
     const showQuestion = (index) => {
@@ -484,6 +810,8 @@ function initAssessmentWizard() {
         questionCards.forEach((card, idx) => {
             card.classList.toggle('active-question', idx === currentIndex);
         });
+        syncQuestionSelectionState(questionCards[currentIndex]);
+        updateAssessmentProgressUI(currentIndex, questionCards.length);
         updateButtonState();
         questionCards[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
@@ -501,31 +829,166 @@ function initAssessmentWizard() {
         showQuestion(currentIndex + 1);
     });
 
+    prevBtn.addEventListener('click', () => {
+        if (prevBtn.disabled) {
+            return;
+        }
+
+        showQuestion(currentIndex - 1);
+    });
+
     questionCards.forEach((card, index) => {
         const options = card.querySelectorAll('input[type="radio"]');
         options.forEach((option) => {
             option.addEventListener('change', () => {
+                syncQuestionSelectionState(card);
                 if (index !== currentIndex) {
                     return;
                 }
 
                 updateButtonState();
-
-                if (autoAdvanceTimer) {
-                    window.clearTimeout(autoAdvanceTimer);
-                }
-
-                if (index < lastIndex) {
-                    autoAdvanceTimer = window.setTimeout(() => {
-                        showQuestion(index + 1);
-                    }, 400);
-                }
             });
         });
     });
 
     showQuestion(0);
     assessmentWizardInitialized = true;
+}
+
+function renderExploreCarousel(config) {
+    const root = document.getElementById(config.targetId);
+    if (!root || !Array.isArray(config.slides) || config.slides.length === 0) {
+        return null;
+    }
+
+    root.innerHTML = `
+        <div class="strand-carousel">
+            <div class="strand-carousel-header">
+                <span class="strand-carousel-label">${escapeHtml(config.label)}</span>
+                <h3 class="strand-carousel-title">${escapeHtml(config.title)}</h3>
+                <p class="strand-carousel-subtitle">${escapeHtml(config.subtitle)}</p>
+            </div>
+
+            <div class="strand-carousel-viewport">
+                <div class="strand-carousel-track">
+                    ${config.slides.map((slide, index) => `
+                        <article class="strand-slide${index === 0 ? ' is-active' : ''}">
+                            <div class="strand-slide-bg" style="background-color:${escapeHtml(slide.accent || '#111111')}; background-image:url('${escapeHtml(slide.image || '')}');"></div>
+                            <div class="strand-slide-overlay"></div>
+                            <div class="strand-slide-content">
+                                <span class="strand-slide-badge">${escapeHtml(slide.strand)}</span>
+                                <h4 class="strand-slide-title">${escapeHtml(slide.title)}</h4>
+                                <p class="strand-slide-desc">${escapeHtml(slide.description)}</p>
+                                <div class="strand-pills">
+                                    ${(slide.pills || []).map((pill) => `<span class="strand-pill">${escapeHtml(pill)}</span>`).join('')}
+                                </div>
+                                <div class="strand-slide-footer">
+                                    <button class="strand-slide-cta" type="button">${escapeHtml(slide.cta || 'Explore')}</button>
+                                    <span class="strand-slide-roles">${escapeHtml(slide.roles || '')}</span>
+                                </div>
+                            </div>
+                        </article>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="strand-carousel-nav">
+                <div class="strand-carousel-nav-left">
+                    <div class="strand-carousel-dots">
+                        ${config.slides.map((slide, index) => `
+                            <button class="strand-carousel-dot${index === 0 ? ' is-active' : ''}" type="button" aria-label="Go to ${escapeHtml(slide.strand)}"></button>
+                        `).join('')}
+                    </div>
+                    <span class="strand-carousel-status">${escapeHtml(config.autoLabel || 'Auto-advancing')}</span>
+                </div>
+                <div class="strand-carousel-controls">
+                    <button class="strand-carousel-control" type="button" aria-label="Previous slide"><</button>
+                    <button class="strand-carousel-control" type="button" aria-label="Next slide">></button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return root;
+}
+
+function initExploreCarousels() {
+    if (exploreCarouselsInitialized) {
+        return;
+    }
+
+    const renderedRoots = EXPLORE_CAROUSEL_DATA
+        .map((config) => ({ config, root: renderExploreCarousel(config) }))
+        .filter((item) => item.root);
+
+    if (!renderedRoots.length) {
+        return;
+    }
+
+    renderedRoots.forEach(({ config, root }) => {
+        const track = root.querySelector('.strand-carousel-track');
+        const slides = Array.from(root.querySelectorAll('.strand-slide'));
+        const dots = Array.from(root.querySelectorAll('.strand-carousel-dot'));
+        const controls = Array.from(root.querySelectorAll('.strand-carousel-control'));
+
+        if (!track || !slides.length || controls.length < 2) {
+            return;
+        }
+
+        let currentIndex = 0;
+        let timerId = null;
+
+        const setSlide = (index) => {
+            currentIndex = (index + slides.length) % slides.length;
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+            slides.forEach((slide, slideIndex) => {
+                slide.classList.toggle('is-active', slideIndex === currentIndex);
+            });
+
+            dots.forEach((dot, dotIndex) => {
+                dot.classList.toggle('is-active', dotIndex === currentIndex);
+                dot.setAttribute('aria-pressed', dotIndex === currentIndex ? 'true' : 'false');
+            });
+        };
+
+        const startAutoPlay = () => {
+            window.clearInterval(timerId);
+            timerId = window.setInterval(() => {
+                setSlide(currentIndex + 1);
+            }, config.intervalMs || 4200);
+        };
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                setSlide(index);
+                startAutoPlay();
+            });
+        });
+
+        controls[0].addEventListener('click', () => {
+            setSlide(currentIndex - 1);
+            startAutoPlay();
+        });
+
+        controls[1].addEventListener('click', () => {
+            setSlide(currentIndex + 1);
+            startAutoPlay();
+        });
+
+        root.addEventListener('mouseenter', () => {
+            window.clearInterval(timerId);
+        });
+
+        root.addEventListener('mouseleave', () => {
+            startAutoPlay();
+        });
+
+        setSlide(0);
+        startAutoPlay();
+    });
+
+    exploreCarouselsInitialized = true;
 }
 
 async function fetchDetailedExplanation() {
@@ -1222,5 +1685,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 window.addEventListener('DOMContentLoaded', async function () {
     initAssessmentWizard();
+    initExploreCarousels();
     await navigateToDashboard();
 });

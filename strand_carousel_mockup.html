@@ -1,0 +1,142 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.carousel-wrap{padding:1rem 0}
+.track-label{font-size:12px;font-weight:500;letter-spacing:.05em;color:#534AB7;background:#EEEDFE;display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;margin-bottom:10px}
+.track-title{font-size:20px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.track-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:14px}
+.carousel-outer{position:relative;overflow:hidden;border-radius:14px}
+.carousel-track{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1)}
+.slide{min-width:100%;height:300px;position:relative;display:flex;align-items:flex-end;overflow:hidden;border-radius:14px}
+.slide-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 8s linear}
+.slide-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,30,.82) 0%,rgba(10,8,30,.3) 55%,transparent 100%)}
+.slide-content{position:relative;z-index:2;padding:22px 24px;width:100%}
+.strand-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px;margin-bottom:8px;background:rgba(255,255,255,.18);color:#fff;border:0.5px solid rgba(255,255,255,.3)}
+.strand-title{font-size:22px;font-weight:500;color:#fff;margin-bottom:4px}
+.strand-desc{font-size:13px;color:rgba(255,255,255,.75);margin-bottom:12px}
+.strand-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.pill{font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.15);color:#fff;border:0.5px solid rgba(255,255,255,.25)}
+.strand-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:7px 16px;border-radius:8px;background:#fff;color:#26215C;border:none;cursor:pointer}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.dots{display:flex;gap:6px}
+.dot{width:8px;height:8px;border-radius:99px;background:var(--color-border-secondary);cursor:pointer;transition:all .2s}
+.dot.active{width:24px;background:#534AB7}
+.nav-btns{display:flex;gap:8px}
+.nav-btn{width:36px;height:36px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--color-background-secondary)}
+.auto-tag{font-size:11px;color:var(--color-text-tertiary);display:flex;align-items:center;gap:5px}
+.auto-dot{width:7px;height:7px;border-radius:50%;background:#1D9E75;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+
+<div class="carousel-wrap">
+  <div class="track-label">
+    <span style="font-size:14px;">📚</span> Academic track
+  </div>
+  <div class="track-title">Explore the strands</div>
+  <div class="track-sub">Swipe or use arrows to browse all academic strands</div>
+
+  <div class="carousel-outer">
+    <div class="carousel-track" id="track">
+
+      <div class="slide">
+        <div class="slide-bg" id="bg0" style="background-color:#1a1060;background-image:url('https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=900&q=80')"></div>
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+          <div class="strand-badge">🔬 STEM strand</div>
+          <div class="strand-title">Science, Technology, Engineering & Math</div>
+          <div class="strand-desc">Master science and innovation — build the future.</div>
+          <div class="strand-pills">
+            <span class="pill">Biology</span><span class="pill">Chemistry</span><span class="pill">Physics</span><span class="pill">Mathematics</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="strand-btn">Explore careers →</button>
+            <span style="font-size:12px;color:rgba(255,255,255,.6)">Doctor · Engineer · Scientist</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-bg" id="bg1" style="background-color:#0a2540;background-image:url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=900&q=80')"></div>
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+          <div class="strand-badge">💼 ABM strand</div>
+          <div class="strand-title">Accountancy, Business & Management</div>
+          <div class="strand-desc">Lead the business world — plan, manage, grow.</div>
+          <div class="strand-pills">
+            <span class="pill">Business Admin</span><span class="pill">Accounting</span><span class="pill">Economics</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="strand-btn">Explore careers →</button>
+            <span style="font-size:12px;color:rgba(255,255,255,.6)">CEO · Accountant · Manager</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-bg" id="bg2" style="background-color:#1a0a2e;background-image:url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=900&q=80')"></div>
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+          <div class="strand-badge">📖 HUMSS strand</div>
+          <div class="strand-title">Humanities & Social Sciences</div>
+          <div class="strand-desc">Understand society, culture, and the human experience.</div>
+          <div class="strand-pills">
+            <span class="pill">History</span><span class="pill">Literature</span><span class="pill">Sociology</span><span class="pill">Philosophy</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="strand-btn">Explore careers →</button>
+            <span style="font-size:12px;color:rgba(255,255,255,.6)">Teacher · Journalist · Lawyer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-bg" id="bg3" style="background-color:#0f2e1a;background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=900&q=80')"></div>
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+          <div class="strand-badge">🎓 GAS strand</div>
+          <div class="strand-title">General Academic Strand</div>
+          <div class="strand-desc">Explore diverse academic paths — keep your options open.</div>
+          <div class="strand-pills">
+            <span class="pill">Core subjects</span><span class="pill">Flexible electives</span><span class="pill">Multi-discipline</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="strand-btn">Explore careers →</button>
+            <span style="font-size:12px;color:rgba(255,255,255,.6)">Multiple pathways available</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="dots" id="dots">
+        <div class="dot active" onclick="goTo(0)"></div>
+        <div class="dot" onclick="goTo(1)"></div>
+        <div class="dot" onclick="goTo(2)"></div>
+        <div class="dot" onclick="goTo(3)"></div>
+      </div>
+      <div class="auto-tag"><span class="auto-dot"></span>Auto-advancing</div>
+    </div>
+    <div class="nav-btns">
+      <button class="nav-btn" onclick="step(-1)">‹</button>
+      <button class="nav-btn" onclick="step(1)">›</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var cur=0,total=4,timer;
+function goTo(n){
+  cur=n;
+  document.getElementById('track').style.transform='translateX(-'+n+'00%)';
+  document.querySelectorAll('.dot').forEach(function(d,i){d.classList.toggle('active',i===n)});
+  var bg=document.getElementById('bg'+n);
+  if(bg){bg.style.transform='scale(1.06)';setTimeout(function(){if(bg)bg.style.transform='scale(1)'},50)}
+  clearInterval(timer);timer=setInterval(function(){goTo((cur+1)%total)},4000);
+}
+function step(d){goTo((cur+d+total)%total)}
+timer=setInterval(function(){goTo((cur+1)%total)},4000);
+</script>
