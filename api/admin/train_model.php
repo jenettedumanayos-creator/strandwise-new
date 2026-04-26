@@ -30,11 +30,9 @@ $db->query(
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
 );
 
-$datasetRow = $db->query('SELECT COUNT(*) AS c FROM recommendations')->fetch_assoc();
-$datasetCount = (int)($datasetRow['c'] ?? 0);
-
-$classRows = $db->query('SELECT COUNT(DISTINCT s.strand_code) AS c FROM recommendations r INNER JOIN strands s ON s.strand_id = r.recommended_strand_id')->fetch_assoc();
-$classCoverage = (int)($classRows['c'] ?? 0);
+$trainingSamples = rf_collect_training_samples($db);
+$datasetCount = count($trainingSamples);
+$classCoverage = count(array_unique(array_column($trainingSamples, 'label')));
 
 $assessmentRows = $db->query('SELECT COUNT(*) AS c FROM assessment_results WHERE domain IN ("STEM","ABM","HUMSS","TVL","GAS")')->fetch_assoc();
 $weightedRows = (int)($assessmentRows['c'] ?? 0);
@@ -60,15 +58,41 @@ if ($datasetCount < 10 || $classCoverage < 3 || $weightedRows < 50) {
     ]);
 }
 
-$base = 55.0;
-$base += min($datasetCount, 120) * 0.22;
-$base += min($weightedRows, 300) * 0.05;
-$base += min($classCoverage, 5) * 3.5;
-$accuracy = max(60.0, min(96.5, $base));
-$accuracy = round($accuracy, 2);
+$paths = rf_model_paths();
+$pythonResult = rf_run_python([
+    'action' => 'train',
+    'feature_names' => rf_feature_names(),
+    'samples' => $trainingSamples,
+    'model_path' => $paths['model'],
+    'metadata_path' => $paths['metadata'],
+    'random_state' => 42,
+    'n_estimators' => 250,
+    'min_samples_leaf' => 1
+]);
 
-$modelName = 'ANN Weighted Strand Model ' . date('Y-m-d H:i');
-$algorithm = 'Artificial Neural Network (weighted rubric bootstrap)';
+if (!($pythonResult['success'] ?? false)) {
+    $runMessage = 'Random Forest training failed: ' . ($pythonResult['message'] ?? 'Unknown error');
+    $runStmt = $db->prepare('INSERT INTO ai_training_runs (triggered_by_admin_id, status, message, samples_used, class_coverage, weighted_rows_used, started_at, finished_at) VALUES (?, "failed", ?, ?, ?, ?, NOW(), NOW())');
+    $runStmt->bind_param('isiii', $auth['admin_id'], $runMessage, $datasetCount, $classCoverage, $weightedRows);
+    $runStmt->execute();
+    $runId = (int)$runStmt->insert_id;
+    $runStmt->close();
+
+    json_response(500, [
+        'success' => false,
+        'message' => $runMessage,
+        'data' => [
+            'run_id' => $runId,
+            'dataset_count' => $datasetCount,
+            'class_coverage' => $classCoverage,
+            'weighted_rows_used' => $weightedRows
+        ]
+    ]);
+}
+
+$accuracy = (float)($pythonResult['accuracy_score'] ?? 0.0);
+$modelName = 'Random Forest Strand Classifier ' . date('Y-m-d H:i');
+$algorithm = 'Random Forest Classifier';
 
 $modelStmt = $db->prepare('INSERT INTO ai_models (model_name, algorithm_type, accuracy_score, training_date) VALUES (?, ?, ?, NOW())');
 $modelStmt->bind_param('ssd', $modelName, $algorithm, $accuracy);
@@ -76,7 +100,7 @@ $modelStmt->execute();
 $modelId = (int)$modelStmt->insert_id;
 $modelStmt->close();
 
-$runMessage = 'Training completed successfully.';
+$runMessage = sprintf('Random Forest training completed successfully via %s evaluation.', $pythonResult['evaluation_mode'] ?? 'training');
 $runStmt = $db->prepare('INSERT INTO ai_training_runs (model_id, triggered_by_admin_id, status, message, samples_used, class_coverage, weighted_rows_used, accuracy_score, started_at, finished_at) VALUES (?, ?, "completed", ?, ?, ?, ?, ?, NOW(), NOW())');
 $runStmt->bind_param('iisiiid', $modelId, $auth['admin_id'], $runMessage, $datasetCount, $classCoverage, $weightedRows, $accuracy);
 $runStmt->execute();
@@ -85,13 +109,14 @@ $runStmt->close();
 
 json_response(200, [
     'success' => true,
-    'message' => 'Model training completed.',
+    'message' => 'Random Forest model training completed.',
     'data' => [
         'run_id' => $runId,
         'model_id' => $modelId,
-        'accuracy_score' => $accuracy,
+        'accuracy_score' => round($accuracy, 2),
         'dataset_count' => $datasetCount,
         'class_coverage' => $classCoverage,
-        'weighted_rows_used' => $weightedRows
+        'weighted_rows_used' => $weightedRows,
+        'evaluation_mode' => $pythonResult['evaluation_mode'] ?? null
     ]
 ]);

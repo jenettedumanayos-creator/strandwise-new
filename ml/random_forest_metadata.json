@@ -1,0 +1,21 @@
+{
+  "algorithm": "Random Forest Classifier",
+  "feature_names": [
+    "STEM",
+    "ABM",
+    "HUMSS",
+    "TVL",
+    "GAS"
+  ],
+  "samples_used": 15,
+  "class_coverage": 5,
+  "class_distribution": {
+    "HUMSS": 2,
+    "GAS": 2,
+    "TVL": 3,
+    "ABM": 3,
+    "STEM": 5
+  },
+  "accuracy_score": 100.0,
+  "evaluation_mode": "training"
+}

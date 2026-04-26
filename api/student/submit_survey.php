@@ -523,14 +523,6 @@ try {
 
     $tvlSubtracks = derive_tvl_subtracks($responses);
 
-    $tieResolution = resolve_tie($weightedScores, $partScores, $tvlSubtracks);
-    $selectedStrandCode = $tieResolution['selected'];
-    $selectedScore = (float) $weightedScores[$selectedStrandCode];
-    $band = score_band($selectedScore);
-
-    $maxWeightedScore = 54.0;
-    $confidence = round(($selectedScore / $maxWeightedScore) * 100, 2);
-
     $insertResult = $db->prepare('INSERT INTO assessment_results (student_id, assessment_id, domain, score) VALUES (?, ?, ?, ?)');
     foreach ($weightedScores as $strandCode => $score) {
         $scoreValue = round((float) $score, 2);
@@ -539,10 +531,29 @@ try {
     }
     $insertResult->close();
 
-    $modelName = 'ANN Weighted Strand Rubric v1';
-    $algorithmType = 'Artificial Neural Network (weighted rubric bootstrap)';
-    $stmt = $db->prepare('SELECT model_id FROM ai_models WHERE model_name = ? LIMIT 1');
-    $stmt->bind_param('s', $modelName);
+    $rfPrediction = rf_run_python([
+        'action' => 'predict',
+        'feature_names' => rf_feature_names(),
+        'features' => $weightedScores
+    ]);
+
+    $tieResolution = resolve_tie($weightedScores, $partScores, $tvlSubtracks);
+    $useRandomForest = ($rfPrediction['success'] ?? false) && !empty($rfPrediction['predicted_strand']);
+    $selectedStrandCode = $useRandomForest && array_key_exists((string)$rfPrediction['predicted_strand'], $weightedScores)
+        ? (string) $rfPrediction['predicted_strand']
+        : $tieResolution['selected'];
+    $selectedScore = (float) $weightedScores[$selectedStrandCode];
+    $band = score_band($selectedScore);
+
+    $maxWeightedScore = 54.0;
+    $confidence = $useRandomForest
+        ? round((float)($rfPrediction['confidence_score'] ?? 0.0), 2)
+        : round(($selectedScore / $maxWeightedScore) * 100, 2);
+
+    $modelName = $useRandomForest ? 'Random Forest Strand Classifier' : 'ANN Weighted Strand Rubric v1';
+    $algorithmType = $useRandomForest ? 'Random Forest Classifier' : 'Artificial Neural Network (weighted rubric bootstrap)';
+    $stmt = $db->prepare('SELECT model_id FROM ai_models WHERE algorithm_type = ? ORDER BY training_date DESC, model_id DESC LIMIT 1');
+    $stmt->bind_param('s', $algorithmType);
     $stmt->execute();
     $model = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -577,6 +588,7 @@ try {
 
     $explanationPayload = [
         'rubric_version' => 'v1',
+        'prediction_source' => $useRandomForest ? 'Random Forest Classifier' : 'Deterministic weighted rubric fallback',
         'part_weights' => [
             'Part I' => 1.5,
             'Part II' => 2.0,
@@ -589,10 +601,18 @@ try {
         'part_scores' => $partScores,
         'tvl_subtracks' => $tvlSubtracks,
         'tie_resolution' => $tieResolution,
-        'score_band' => $band
+        'score_band' => $band,
+        'model_prediction' => [
+            'predicted_strand' => $selectedStrandCode,
+            'confidence_score' => $confidence,
+            'class_probabilities' => $rfPrediction['class_probabilities'] ?? null
+        ]
     ];
 
-    $decisionBasis = implode(' ', $tieResolution['decision_path']) . ' Final score band: ' . $band['strength_level'] . '.';
+    $decisionBasis = ($useRandomForest
+        ? 'Random Forest classifier selected ' . $selectedStrandCode . '.'
+        : implode(' ', $tieResolution['decision_path'])
+    ) . ' Final score band: ' . $band['strength_level'] . '.';
     $explanationText = json_encode($explanationPayload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
     if ($explanationText === false) {
         throw new Exception('Failed to encode recommendation explanation payload.');
@@ -611,7 +631,7 @@ try {
 
     json_response(201, [
         'success' => true,
-        'message' => 'Survey saved and weighted ANN-ready recommendation generated.',
+        'message' => 'Survey saved and Random Forest recommendation generated.',
         'data' => [
             'recommendation_id' => $recommendationId,
             'selected_strand' => $selectedStrandCode,
@@ -620,7 +640,9 @@ try {
             'raw_scores' => $rawScores,
             'tvl_subtracks' => $tvlSubtracks,
             'score_band' => $band,
-            'tie_resolution' => $tieResolution
+            'tie_resolution' => $tieResolution,
+            'prediction_source' => $useRandomForest ? 'Random Forest Classifier' : 'Deterministic weighted rubric fallback',
+            'class_probabilities' => $rfPrediction['class_probabilities'] ?? null
         ]
     ]);
 } catch (Throwable $e) {

@@ -51,11 +51,9 @@ try {
     $newAssessmentCount = (int)($newAssessmentResult['count'] ?? 0);
 
     // Get current dataset statistics
-    $datasetRow = $db->query('SELECT COUNT(*) AS c FROM recommendations')->fetch_assoc();
-    $datasetCount = (int)($datasetRow['c'] ?? 0);
-
-    $classRows = $db->query('SELECT COUNT(DISTINCT s.strand_code) AS c FROM recommendations r INNER JOIN strands s ON s.strand_id = r.recommended_strand_id')->fetch_assoc();
-    $classCoverage = (int)($classRows['c'] ?? 0);
+    $trainingSamples = rf_collect_training_samples($db);
+    $datasetCount = count($trainingSamples);
+    $classCoverage = count(array_unique(array_column($trainingSamples, 'label')));
 
     $assessmentRows = $db->query('SELECT COUNT(*) AS c FROM assessment_results WHERE domain IN ("STEM","ABM","HUMSS","TVL","GAS")')->fetch_assoc();
     $weightedRows = (int)($assessmentRows['c'] ?? 0);
@@ -95,28 +93,55 @@ try {
 
     // If training should run, execute it
     if ($shouldTrain) {
-        // Create training entry with "in_progress" status
-        $modelName = 'ANN Weighted Strand Model ' . date('Y-m-d H:i');
-        $algorithm = 'Artificial Neural Network (weighted rubric bootstrap)';
+        $paths = rf_model_paths();
+        $pythonResult = rf_run_python([
+            'action' => 'train',
+            'feature_names' => rf_feature_names(),
+            'samples' => $trainingSamples,
+            'model_path' => $paths['model'],
+            'metadata_path' => $paths['metadata'],
+            'random_state' => 42,
+            'n_estimators' => 250,
+            'min_samples_leaf' => 1
+        ]);
 
-        $modelStmt = $db->prepare('INSERT INTO ai_models (model_name, algorithm_type, training_date) VALUES (?, ?, NOW())');
-        $modelStmt->bind_param('ss', $modelName, $algorithm);
+        if (!($pythonResult['success'] ?? false)) {
+            $runMessage = 'Auto-training failed: ' . ($pythonResult['message'] ?? 'Unknown error');
+            $runStmt = $db->prepare('INSERT INTO ai_training_runs (status, message, samples_used, class_coverage, weighted_rows_used, started_at, finished_at) VALUES ("failed", ?, ?, ?, ?, NOW(), NOW())');
+            $runStmt->bind_param('siii', $runMessage, $datasetCount, $classCoverage, $weightedRows);
+            $runStmt->execute();
+            $runId = (int)$runStmt->insert_id;
+            $runStmt->close();
+
+            json_response(500, [
+                'success' => false,
+                'message' => $runMessage,
+                'data' => [
+                    'status' => 'failed',
+                    'run_id' => $runId,
+                    'dataset_count' => $datasetCount,
+                    'class_coverage' => $classCoverage,
+                    'weighted_rows_used' => $weightedRows,
+                    'new_assessments' => $newAssessmentCount,
+                    'hours_since_last_training' => round($hoursSinceTraining, 1),
+                    'reason' => $reason
+                ]
+            ]);
+        }
+
+        $accuracy = (float)($pythonResult['accuracy_score'] ?? 0.0);
+        $modelName = 'Random Forest Strand Classifier ' . date('Y-m-d H:i');
+        $algorithm = 'Random Forest Classifier';
+
+        $modelStmt = $db->prepare('INSERT INTO ai_models (model_name, algorithm_type, accuracy_score, training_date) VALUES (?, ?, ?, NOW())');
+        $modelStmt->bind_param('ssd', $modelName, $algorithm, $accuracy);
         $modelStmt->execute();
         $modelId = (int)$modelStmt->insert_id;
         $modelStmt->close();
 
-        // Calculate accuracy score
-        $base = 55.0;
-        $base += min($datasetCount, 120) * 0.22;
-        $base += min($weightedRows, 300) * 0.05;
-        $base += min($classCoverage, 5) * 3.5;
-        $accuracy = max(60.0, min(96.5, $base));
-        $accuracy = round($accuracy, 2);
-
-        // Record training run
-        $runMessage = 'Auto-training completed successfully.';
+        $runMessage = sprintf('Auto-training completed successfully via %s evaluation.', $pythonResult['evaluation_mode'] ?? 'training');
         $runStmt = $db->prepare('INSERT INTO ai_training_runs (model_id, status, message, samples_used, class_coverage, weighted_rows_used, accuracy_score, started_at, finished_at) VALUES (?, "completed", ?, ?, ?, ?, ?, NOW(), NOW())');
-        $runStmt->bind_param('issiiid', $modelId, $runMessage, $datasetCount, $classCoverage, $weightedRows, $accuracy);
+        $runStmt->bind_param('isiiid', $modelId, $runMessage, $datasetCount, $classCoverage, $weightedRows, $accuracy);
         $runStmt->execute();
         $runId = (int)$runStmt->insert_id;
         $runStmt->close();
@@ -131,13 +156,14 @@ try {
                 'status' => 'completed',
                 'model_id' => $modelId,
                 'run_id' => $runId,
-                'accuracy_score' => $accuracy,
+                'accuracy_score' => round($accuracy, 2),
                 'dataset_count' => $datasetCount,
                 'class_coverage' => $classCoverage,
                 'weighted_rows_used' => $weightedRows,
                 'new_assessments' => $newAssessmentCount,
                 'hours_since_last_training' => round($hoursSinceTraining, 1),
-                'reason' => $reason
+                'reason' => $reason,
+                'evaluation_mode' => $pythonResult['evaluation_mode'] ?? null
             ]
         ]);
     } else {

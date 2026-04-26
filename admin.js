@@ -111,6 +111,13 @@ window.addEventListener('DOMContentLoaded', async function () {
     loadDashboardData();
 });
 
+// ============ CHARTS INITIALIZATION ============
+
+function initializeCharts() {
+    // Charts initialization (placeholder for future chart library integration)
+    // Currently handled by inline Canvas/SVG rendering in dashboard sections
+}
+
 // ============ SIDEBAR NAVIGATION ============
 
 function initializeSidebar() {
@@ -358,6 +365,15 @@ async function loadModelProgress() {
     try {
         const response = await apiRequest('/admin/model_progress.php', { method: 'GET' });
         const data = response.data || {};
+        let flaskHealth = null;
+        try {
+            const flaskResponse = await apiRequest('/admin/flask_health.php', { method: 'GET' });
+            flaskHealth = flaskResponse;
+            console.log('Flask health response:', flaskHealth);
+        } catch (_flaskErr) {
+            console.warn('Flask health check failed:', _flaskErr.message);
+            flaskHealth = { success: true, connected: false, message: 'Health check failed or Flask unreachable' };
+        }
 
         const percent = Number(data.progress_percent || 0);
         const phase = data.current_phase || 'Data Preparation';
@@ -379,6 +395,7 @@ async function loadModelProgress() {
         const runStatusEl = document.getElementById('aiRunStatus');
         const milestonesEl = document.getElementById('aiMilestones');
         const historyEl = document.getElementById('aiRunHistoryList');
+        const flaskStatusEl = document.getElementById('aiFlaskStatus');
 
         if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
         if (progressPercent) progressPercent.textContent = `${Math.round(percent)}%`;
@@ -398,6 +415,23 @@ async function loadModelProgress() {
                     : `${latestRun.accuracy_score}%`;
                 runStatusEl.innerHTML = `<strong>${typeIcon} Last ${runType} run:</strong> ${latestRun.status} at ${formatDateTime(latestRun.finished_at || latestRun.started_at)} (accuracy: ${accText})<br><small style="color: #666;">Auto-training is active: model trains automatically after each student assessment (≥5 new assessments or ≥6 hours since last training).</small>`;
             }
+        }
+
+        if (flaskStatusEl && flaskHealth) {
+            const connected = Boolean(flaskHealth.connected);
+            const message = connected
+                ? 'Flask ML Service: Connected'
+                : `Flask ML Service: Offline${flaskHealth.message ? ` - ${flaskHealth.message}` : ''}`;
+            flaskStatusEl.style.background = connected ? '#e6f7ee' : '#fdecea';
+            flaskStatusEl.style.color = connected ? '#1f7a44' : '#9f2d2d';
+            flaskStatusEl.style.border = connected ? '1px solid #b7e4c7' : '1px solid #f5b5b5';
+            flaskStatusEl.innerHTML = `<span style="width: 8px; height: 8px; border-radius: 50%; background: ${connected ? '#2f9e44' : '#d94848'};"></span>${message}`;
+            flaskStatusEl.title = connected ? 'Flask health endpoint is reachable.' : 'Flask ML Service is not responding';
+        } else if (flaskStatusEl) {
+            flaskStatusEl.style.background = '#fff3cd';
+            flaskStatusEl.style.color = '#7a5a00';
+            flaskStatusEl.style.border = '1px solid #ffe08a';
+            flaskStatusEl.innerHTML = '<span style="width: 8px; height: 8px; border-radius: 50%; background: #d69e2e;"></span>Flask ML Service: Unknown';
         }
 
         if (milestonesEl) {
@@ -440,6 +474,7 @@ async function loadModelProgress() {
         const runStatusEl = document.getElementById('aiRunStatus');
         const milestonesEl = document.getElementById('aiMilestones');
         const historyEl = document.getElementById('aiRunHistoryList');
+        const flaskStatusEl = document.getElementById('aiFlaskStatus');
         if (runStatusEl) {
             runStatusEl.textContent = 'Last run: unavailable';
         }
@@ -448,6 +483,12 @@ async function loadModelProgress() {
         }
         if (historyEl) {
             historyEl.innerHTML = `<div class="ai-run-item failed"><div class="meta"><span class="title">Unable to load training history</span><span class="sub">${err.message}</span></div><span class="status">error</span></div>`;
+        }
+        if (flaskStatusEl) {
+            flaskStatusEl.style.background = '#fff3cd';
+            flaskStatusEl.style.color = '#7a5a00';
+            flaskStatusEl.style.border = '1px solid #ffe08a';
+            flaskStatusEl.innerHTML = '<span style="width: 8px; height: 8px; border-radius: 50%; background: #d69e2e;"></span>Flask ML Service: Unknown';
         }
     }
 }
